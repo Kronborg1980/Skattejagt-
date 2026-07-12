@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Norröna Skattejagt · Treasure Hunt</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --deep:#0C3456; --ocean:#1A5F99; --sky:#D6E8F9; --sky-soft:#EAF3FC;
+  --gold:#FFC94D; --gold-deep:#E8A800; --green:#06D6A0; --red:#EF476F;
+  --purple:#9B5DE5; --bg:#F2F7FB; --ink:#22344A; --card:#FFFFFF;
+  --shadow:0 8px 24px rgba(12,52,86,.10);
+  --shadow-sm:0 3px 10px rgba(12,52,86,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Fredoka',sans-serif;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--ink);display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;}
+
+header{background:linear-gradient(160deg,#0A2E4E 0%,#14508A 70%,#1A5F99 100%);color:#fff;padding:14px 16px 22px;position:relative;z-index:20;}
+header::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:16px;
+  background:radial-gradient(18px 14px at 9px 16px, var(--bg) 98%, transparent 100%);
+  background-size:36px 16px;background-repeat:repeat-x;}
+.header-row{display:flex;align-items:center;justify-content:center;position:relative;min-height:34px;}
+.back-btn{position:absolute;left:0;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);padding:7px 13px;border-radius:20px;color:#fff;font-size:14px;font-weight:600;display:none;cursor:pointer;transition:background .2s;font-family:'Fredoka',sans-serif;}
+.back-btn:active{background:rgba(255,255,255,.35);}
+.lang-btn{position:absolute;right:0;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);padding:6px 11px;border-radius:20px;color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:'Fredoka',sans-serif;}
+.lang-btn:active{background:rgba(255,255,255,.35);}
+#headerTitle{font-size:19px;font-weight:700;letter-spacing:.3px;text-shadow:0 2px 6px rgba(0,0,0,.25);}
+.hud{display:flex;justify-content:center;gap:8px;margin-top:10px;}
+.hud-chip{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:4px 13px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;backdrop-filter:blur(4px);}
+.hud-chip b{color:var(--gold);font-weight:700;}
+
+main{flex:1;overflow-y:auto;padding:18px 16px 80px;position:relative;-webkit-overflow-scrolling:touch;}
+.view{display:none;animation:slideUp .4s cubic-bezier(.175,.885,.32,1.275);}
+.view.active{display:block;}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+
+.hero-container{position:relative;margin-bottom:26px;border-radius:22px;box-shadow:var(--shadow);overflow:visible;background:var(--sky);}
+.hero-clip{border-radius:22px;overflow:hidden;}
+.hero-img{width:100%;height:190px;display:block;}
+.hero-badge{position:absolute;top:14px;right:14px;background:var(--gold);color:var(--deep);padding:5px 13px;border-radius:20px;font-weight:700;font-size:13px;box-shadow:0 4px 10px rgba(0,0,0,.25);z-index:2;}
+.hero-avatar{position:absolute;bottom:-18px;left:16px;background:#fff;border-radius:40px;padding:6px 18px 6px 8px;display:flex;align-items:center;gap:9px;font-weight:700;color:var(--deep);box-shadow:0 8px 18px rgba(12,52,86,.22);cursor:pointer;z-index:3;font-size:15px;}
+.hero-avatar .em{font-size:24px;background:var(--sky);border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;}
+.hero-avatar .edit{font-size:12px;color:#8aa5bd;font-weight:600;}
+
+.rank-card{background:linear-gradient(135deg,#FFFBEF,#FFF3D1);border:2px solid #FFE3A0;border-radius:18px;padding:15px 16px 13px;margin-bottom:18px;box-shadow:var(--shadow-sm);}
+.rank-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}
+.rank-title{font-weight:700;color:var(--deep);font-size:17px;display:flex;align-items:center;gap:8px;}
+.rank-title .ri{font-size:24px;}
+.rank-pts{font-weight:700;color:var(--gold-deep);font-size:15px;background:#fff;padding:3px 11px;border-radius:14px;box-shadow:var(--shadow-sm);}
+.rank-bar{width:100%;height:13px;background:#fff;border-radius:20px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,.08);}
+.rank-fill{height:100%;background:linear-gradient(90deg,var(--gold),#FF9E42);width:0%;transition:width .6s ease;border-radius:20px;}
+.rank-next{font-size:12px;color:#a5813a;margin-top:7px;font-weight:600;text-align:right;}
+
+.welcome-text{text-align:center;margin-bottom:20px;padding:0 8px;}
+.welcome-text h2{font-size:24px;color:var(--deep);margin-bottom:5px;}
+.welcome-text p{font-size:14px;color:#5b7189;line-height:1.5;}
+
+.menu-grid{display:grid;gap:13px;}
+.menu-btn{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--card);border:none;border-radius:20px;font-size:18px;font-weight:700;color:var(--deep);cursor:pointer;box-shadow:var(--shadow-sm);transition:transform .15s;position:relative;text-align:left;width:100%;font-family:'Fredoka',sans-serif;}
+.menu-btn:active{transform:scale(.97);}
+.btn-icon{font-size:28px;width:56px;height:56px;min-width:56px;display:flex;align-items:center;justify-content:center;border-radius:16px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.08);}
+.menu-btn.blue .btn-icon{background:linear-gradient(145deg,#DCEBFB,#B9D8F5);}
+.menu-btn.gold .btn-icon{background:linear-gradient(145deg,#FFF0C9,#FFDF94);}
+.menu-btn.green .btn-icon{background:linear-gradient(145deg,#D3F8EC,#A8EFD7);}
+.menu-btn.purple .btn-icon{background:linear-gradient(145deg,#EEE2FC,#DCC6F8);}
+.menu-sub{font-size:12.5px;color:#7b90a5;font-weight:500;margin-top:2px;}
+.menu-progress{margin-left:auto;background:var(--sky);color:var(--ocean);font-size:12.5px;font-weight:700;padding:5px 11px;border-radius:14px;white-space:nowrap;}
+.menu-progress.done{background:var(--green);color:#fff;}
+
+.progress-header{background:#fff;padding:16px 16px 12px;border-radius:18px;box-shadow:var(--shadow);margin-bottom:16px;text-align:center;position:sticky;top:0;z-index:15;}
+.progress-text{font-weight:700;color:var(--deep);margin-bottom:16px;font-size:16px;}
+.progress-text b{color:var(--ocean);}
+.voyage{position:relative;padding:0 14px 2px 4px;}
+.voyage-track{width:100%;background:var(--sky-soft);border:1px solid var(--sky);border-radius:20px;height:16px;overflow:hidden;}
+.voyage-fill{height:100%;background:linear-gradient(90deg,#4DA3E8,var(--green));width:0%;transition:width .5s cubic-bezier(.4,0,.2,1);border-radius:20px;}
+.voyage-ship{position:absolute;top:-17px;left:2%;font-size:25px;transform:translateX(-50%);transition:left .5s cubic-bezier(.4,0,.2,1);filter:drop-shadow(0 3px 4px rgba(0,0,0,.25));animation:bob 2.5s ease-in-out infinite;z-index:2;}
+@keyframes bob{0%,100%{margin-top:0;}50%{margin-top:-3px;}}
+.voyage-goal{position:absolute;right:-2px;top:-16px;font-size:19px;}
+
+.section-intro{background:linear-gradient(135deg,#fff,var(--sky-soft));border:2px dashed #A9CBEA;border-radius:16px;padding:12px 15px;margin-bottom:16px;font-size:13.5px;color:#33506e;font-weight:600;text-align:center;line-height:1.5;}
+
+.task-card{background:var(--card);padding:16px 16px 15px;border-radius:20px;margin-bottom:13px;box-shadow:var(--shadow-sm);position:relative;border:2px solid transparent;transition:border-color .3s, background .3s;}
+.task-card.completed{border-color:#9FEBD3;background:#F2FDF9;}
+.task-card.completed .task-icon{background:#CBF6E8;}
+.task-header{display:flex;align-items:flex-start;gap:13px;margin-bottom:6px;padding-right:52px;}
+.task-icon{font-size:27px;background:var(--sky-soft);min-width:50px;height:50px;display:flex;align-items:center;justify-content:center;border-radius:15px;transition:background .3s;}
+.task-content{flex:1;min-width:0;}
+.task-title{font-weight:700;font-size:16.5px;color:var(--deep);margin-bottom:3px;line-height:1.25;}
+.task-desc{font-size:13.5px;color:#5b7189;line-height:1.45;}
+.fun-fact{font-size:11.5px;background:#FFF4D6;color:#9a7715;border:1px solid #FFE3A0;padding:4px 9px;border-radius:9px;display:inline-block;margin-top:8px;font-weight:600;line-height:1.35;}
+.task-pts{position:absolute;top:13px;right:13px;font-size:11px;font-weight:700;color:var(--gold-deep);background:#FFF8E4;border:1px solid #FFE3A0;padding:3px 8px;border-radius:11px;}
+.task-action{margin-top:13px;display:flex;align-items:center;gap:9px;}
+.task-input{flex:1;min-width:0;padding:11px 13px;border:2px solid var(--sky);border-radius:12px;font-size:16px;font-weight:600;color:var(--deep);outline:none;transition:border-color .2s;background:#FBFDFF;font-family:'Fredoka',sans-serif;}
+.task-input:focus{border-color:var(--ocean);}
+.spacer{flex:1;}
+
+.camera-btn{background:linear-gradient(145deg,#DCEBFB,#C3DCF6);border:none;border-radius:14px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;font-size:21px;cursor:pointer;transition:transform .15s;flex-shrink:0;position:relative;box-shadow:inset 0 -3px 0 rgba(26,95,153,.18);}
+.camera-btn:active{transform:scale(.92);}
+.camera-btn.has-photo{background:linear-gradient(145deg,#FFE9AE,var(--gold));}
+.camera-btn.has-photo::after{content:'✓';position:absolute;top:-6px;right:-6px;background:var(--green);color:#fff;font-size:11px;font-weight:700;width:19px;height:19px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #fff;}
+.file-input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;}
+
+.check-btn{width:48px;height:48px;min-width:48px;background:#fff;border:3px solid var(--sky);border-radius:14px;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;justify-content:center;font-size:23px;color:transparent;box-shadow:var(--shadow-sm);}
+.check-btn.on{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 4px 12px rgba(6,214,160,.35);}
+.check-btn.on .star{animation:popIn .3s backwards;}
+@keyframes popIn{0%{transform:scale(0);}80%{transform:scale(1.25);}100%{transform:scale(1);}}
+
+.img-preview-container{text-align:center;padding-top:13px;border-top:2px dashed var(--sky);margin-top:13px;position:relative;display:none;}
+.img-preview-container.show{display:block;}
+.img-preview{max-height:150px;max-width:100%;border-radius:12px;border:3px solid var(--gold);box-shadow:0 4px 10px rgba(0,0,0,.14);}
+.img-remove{position:absolute;top:19px;right:6px;background:var(--red);color:#fff;border:none;width:29px;height:29px;border-radius:50%;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.3);}
+
+.certificate{background:linear-gradient(150deg,#FFF9E6,#FFFFFF 55%,#FFF3D1);border:4px dashed var(--gold);border-radius:22px;padding:28px 20px;text-align:center;box-shadow:0 15px 35px rgba(255,201,77,.3);margin-top:28px;position:relative;overflow:hidden;display:none;animation:certPop .6s cubic-bezier(.175,.885,.32,1.275);}
+.certificate.show{display:block;}
+@keyframes certPop{0%{transform:scale(.85);opacity:0;}100%{transform:scale(1);opacity:1;}}
+.certificate::before{content:'🎊';position:absolute;top:-8px;left:-8px;font-size:54px;opacity:.45;}
+.certificate::after{content:'🎉';position:absolute;bottom:-8px;right:-8px;font-size:54px;opacity:.45;}
+.cert-icon{font-size:62px;margin-bottom:6px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.18));animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-9px);}}
+.certificate h2{color:#D4A017;margin-bottom:8px;font-size:23px;text-transform:uppercase;letter-spacing:2px;}
+.cert-name{font-size:20px;font-weight:700;color:var(--deep);margin-bottom:6px;}
+.cert-text{font-size:14.5px;font-weight:600;color:var(--ink);margin-bottom:14px;}
+.cert-instruction{background:#fff;padding:11px;border-radius:12px;font-size:13.5px;color:var(--deep);font-weight:700;border:2px solid var(--sky);line-height:1.45;}
+
+.album-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.album-item{background:#fff;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm);}
+.album-item img{width:100%;height:125px;object-fit:cover;display:block;}
+.album-caption{padding:8px 10px;font-size:11.5px;font-weight:600;color:var(--deep);line-height:1.3;}
+.album-empty{text-align:center;padding:55px 24px;color:#8298ad;font-weight:600;font-size:15px;line-height:1.6;}
+.album-empty .big{font-size:54px;display:block;margin-bottom:12px;}
+
+#toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(90px);background:var(--deep);color:#fff;padding:12px 24px;border-radius:30px;font-weight:700;font-size:14.5px;box-shadow:0 10px 24px rgba(0,0,0,.35);z-index:200;transition:transform .35s cubic-bezier(.175,.885,.32,1.275);pointer-events:none;white-space:nowrap;}
+#toast.show{transform:translateX(-50%) translateY(0);}
+
+.modal-backdrop{position:fixed;inset:0;background:rgba(10,46,78,.62);backdrop-filter:blur(5px);z-index:150;display:none;align-items:center;justify-content:center;padding:22px;}
+.modal-backdrop.open{display:flex;}
+.modal{background:#fff;border-radius:24px;padding:26px 22px;max-width:360px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.35);animation:certPop .45s cubic-bezier(.175,.885,.32,1.275);}
+.modal h2{color:var(--deep);font-size:22px;margin-bottom:5px;}
+.modal p{font-size:13.5px;color:#7b90a5;margin-bottom:16px;font-weight:500;}
+.avatar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.avatar-opt{font-size:31px;background:var(--sky-soft);border:3px solid transparent;border-radius:15px;padding:9px 0;cursor:pointer;transition:all .15s;}
+.avatar-opt.sel{border-color:var(--gold);background:#FFF6DC;transform:scale(1.09);}
+.name-input{width:100%;padding:13px;border:2px solid var(--sky);border-radius:13px;font-size:17px;font-weight:600;color:var(--deep);text-align:center;outline:none;margin-bottom:16px;background:#FBFDFF;font-family:'Fredoka',sans-serif;}
+.name-input:focus{border-color:var(--ocean);}
+.go-btn{width:100%;padding:15px;background:linear-gradient(135deg,#1A5F99,#0C3456);color:#fff;border:none;border-radius:16px;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 8px 18px rgba(26,95,153,.4);transition:transform .15s;font-family:'Fredoka',sans-serif;}
+.go-btn:active{transform:scale(.96);}
+
+/* Sprogvælger */
+.lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.lang-opt{display:flex;align-items:center;gap:9px;background:var(--sky-soft);border:3px solid transparent;border-radius:15px;padding:12px 14px;cursor:pointer;transition:all .15s;font-weight:700;color:var(--deep);font-size:15px;}
+.lang-opt .fl{font-size:24px;}
+.lang-opt.sel{border-color:var(--gold);background:#FFF6DC;}
+
+#confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100;}
+</style>
+</head>
+<body>
+
+<canvas id="confetti"></canvas>
+<div id="toast"></div>
+
+<!-- SETUP MODAL -->
+<div class="modal-backdrop" id="setupModal">
+  <div class="modal">
+    <h2 id="mSetupH">🗺️</h2>
+    <p id="mSetupP"></p>
+    <div class="avatar-grid" id="avatarGrid"></div>
+    <input type="text" class="name-input" id="nameInput" maxlength="20">
+    <button class="go-btn" id="goBtn" type="button"></button>
+  </div>
+</div>
+
+<!-- LANGUAGE MODAL -->
+<div class="modal-backdrop" id="langModal">
+  <div class="modal">
+    <h2 id="mLangH">🌍</h2>
+    <p id="mLangP"></p>
+    <div class="lang-grid" id="langGrid"></div>
+  </div>
+</div>
+
+<header>
+  <div class="header-row">
+    <button class="back-btn" id="backBtn" type="button">❮</button>
+    <span id="headerTitle"></span>
+    <button class="lang-btn" id="langBtn" type="button">🇩🇰</button>
+  </div>
+  <div class="hud">
+    <div class="hud-chip">⭐ <b id="hudStars">0</b></div>
+    <div class="hud-chip">🪙 <b id="hudPoints">0</b>&nbsp;<span id="hudPtsWord">point</span></div>
+    <div class="hud-chip">📸 <b id="hudPhotos">0</b></div>
+  </div>
+</header>
+
+<main id="mainContent">
+
+  <!-- HOME -->
+  <div id="home" class="view active">
+    <div class="hero-container">
+      <div class="hero-clip">
+        <svg class="hero-img" viewBox="0 0 400 190" preserveAspectRatio="xMidYMid slice" role="img" aria-label="MS Norröna">
+          <defs>
+            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#8EC9F5"/><stop offset="70%" stop-color="#CDE7FB"/><stop offset="100%" stop-color="#E8F4FD"/>
+            </linearGradient>
+            <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2E7FC2"/><stop offset="100%" stop-color="#14508A"/>
+            </linearGradient>
+          </defs>
+          <rect width="400" height="190" fill="url(#sky)"/>
+          <circle cx="340" cy="38" r="20" fill="#FFDE7A"/><circle cx="340" cy="38" r="26" fill="#FFDE7A" opacity=".3"/>
+          <path d="M-10 120 L60 62 L110 105 L160 75 L215 120 Z" fill="#5E8F6E"/>
+          <path d="M120 120 L190 55 L245 95 L300 70 L360 120 L410 95 L410 130 L-10 130 Z" fill="#4A7A5C"/>
+          <path d="M60 62 L75 74 L60 80 L48 72 Z" fill="#EAF4EE"/>
+          <path d="M190 55 L204 68 L190 74 L178 66 Z" fill="#EAF4EE"/>
+          <ellipse cx="90" cy="34" rx="26" ry="9" fill="#fff" opacity=".85"/>
+          <ellipse cx="112" cy="28" rx="18" ry="7" fill="#fff" opacity=".85"/>
+          <ellipse cx="235" cy="24" rx="22" ry="8" fill="#fff" opacity=".8"/>
+          <rect y="118" width="400" height="72" fill="url(#sea)"/>
+          <path d="M0 122 Q20 116 40 122 T80 122 T120 122 T160 122 T200 122 T240 122 T280 122 T320 122 T360 122 T400 122 V132 H0 Z" fill="#5FA8DE" opacity=".55"/>
+          <g>
+            <path d="M70 128 L82 158 L318 158 L338 128 Z" fill="#0C3456"/>
+            <path d="M70 128 L338 128 L332 137 L76 137 Z" fill="#123F63"/>
+            <text x="200" y="152" text-anchor="middle" font-family="Fredoka, sans-serif" font-size="13" font-weight="700" fill="#FFC94D" letter-spacing="3">NORRÖNA</text>
+            <rect x="98" y="100" width="212" height="28" rx="5" fill="#F5FAFF"/>
+            <rect x="118" y="82" width="172" height="22" rx="5" fill="#FFFFFF"/>
+            <rect x="146" y="66" width="112" height="20" rx="5" fill="#F5FAFF"/>
+            <g fill="#7FB6E3">
+              <rect x="108" y="108" width="11" height="8" rx="2"/><rect x="126" y="108" width="11" height="8" rx="2"/><rect x="144" y="108" width="11" height="8" rx="2"/><rect x="162" y="108" width="11" height="8" rx="2"/><rect x="180" y="108" width="11" height="8" rx="2"/><rect x="198" y="108" width="11" height="8" rx="2"/><rect x="216" y="108" width="11" height="8" rx="2"/><rect x="234" y="108" width="11" height="8" rx="2"/><rect x="252" y="108" width="11" height="8" rx="2"/><rect x="270" y="108" width="11" height="8" rx="2"/><rect x="288" y="108" width="11" height="8" rx="2"/>
+              <rect x="128" y="89" width="10" height="7" rx="2"/><rect x="145" y="89" width="10" height="7" rx="2"/><rect x="162" y="89" width="10" height="7" rx="2"/><rect x="179" y="89" width="10" height="7" rx="2"/><rect x="196" y="89" width="10" height="7" rx="2"/><rect x="213" y="89" width="10" height="7" rx="2"/><rect x="230" y="89" width="10" height="7" rx="2"/><rect x="247" y="89" width="10" height="7" rx="2"/><rect x="264" y="89" width="10" height="7" rx="2"/>
+              <rect x="156" y="72" width="9" height="7" rx="2"/><rect x="172" y="72" width="9" height="7" rx="2"/><rect x="188" y="72" width="9" height="7" rx="2"/><rect x="204" y="72" width="9" height="7" rx="2"/><rect x="220" y="72" width="9" height="7" rx="2"/><rect x="236" y="72" width="9" height="7" rx="2"/>
+            </g>
+            <path d="M266 44 L288 44 L292 66 L262 66 Z" fill="#0C3456"/>
+            <rect x="262" y="52" width="30" height="6" fill="#FFC94D"/>
+            <rect x="151" y="46" width="3" height="20" fill="#8FA8BD"/>
+            <path d="M154 47 L170 51 L154 56 Z" fill="#EF476F"/>
+            <path d="M58 155 Q68 146 80 152 Q72 160 60 160 Z" fill="#EAF6FF" opacity=".9"/>
+            <path d="M318 158 Q336 150 352 156 Q340 164 322 163 Z" fill="#EAF6FF" opacity=".8"/>
+          </g>
+          <path d="M52 46 q5 -6 10 0 q5 -6 10 0" stroke="#5C7A94" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path d="M300 60 q4 -5 8 0 q4 -5 8 0" stroke="#5C7A94" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <g stroke="#7FB6E3" stroke-width="3" stroke-linecap="round" opacity=".5">
+            <path d="M20 172 h30"/><path d="M340 174 h34"/><path d="M50 182 h22"/><path d="M300 184 h26"/>
+          </g>
+        </svg>
+      </div>
+      <div class="hero-badge">🚢 MS Norröna</div>
+      <div class="hero-avatar" id="heroAvatar"><span class="em" id="homeAvatar">🦊</span><span id="homeName"></span><span class="edit">✏️</span></div>
+    </div>
+
+    <div class="rank-card">
+      <div class="rank-top">
+        <div class="rank-title"><span class="ri" id="rankIcon">🦀</span> <span id="rankName"></span></div>
+        <div class="rank-pts">🪙 <span id="rankPoints">0</span></div>
+      </div>
+      <div class="rank-bar"><div class="rank-fill" id="rankFill"></div></div>
+      <div class="rank-next" id="rankNext"></div>
+    </div>
+
+    <div class="welcome-text">
+      <h2 id="welcomeH"></h2>
+      <p id="welcomeP"></p>
+    </div>
+
+    <div class="menu-grid">
+      <button class="menu-btn blue" data-nav="onboard" type="button">
+        <span class="btn-icon">⚓</span>
+        <span><span style="display:block" id="mTitle-onboard"></span><span class="menu-sub" id="mSub-onboard"></span></span>
+        <span class="menu-progress" id="menu-onboard">0/0</span>
+      </button>
+      <button class="menu-btn gold" data-nav="hotel" type="button">
+        <span class="btn-icon">🏨</span>
+        <span><span style="display:block" id="mTitle-hotel"></span><span class="menu-sub" id="mSub-hotel"></span></span>
+        <span class="menu-progress" id="menu-hotel">0/0</span>
+      </button>
+      <button class="menu-btn green" data-nav="faroe" type="button">
+        <span class="btn-icon">⛰️</span>
+        <span><span style="display:block" id="mTitle-faroe"></span><span class="menu-sub" id="mSub-faroe"></span></span>
+        <span class="menu-progress" id="menu-faroe">0/0</span>
+      </button>
+      <button class="menu-btn purple" data-nav="album" type="button">
+        <span class="btn-icon">📸</span>
+        <span><span style="display:block" id="mTitle-album"></span><span class="menu-sub" id="mSub-album"></span></span>
+        <span class="menu-progress" id="menu-album">0</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ONBOARD -->
+  <div id="onboard" class="view">
+    <div class="progress-header">
+      <div class="progress-text"><span id="plabel-onboard"></span> <b id="text-progress-onboard">0/0</b></div>
+      <div class="voyage">
+        <div class="voyage-ship" id="ship-onboard">🚢</div>
+        <div class="voyage-goal">🏝️</div>
+        <div class="voyage-track"><div class="voyage-fill" id="progress-onboard"></div></div>
+      </div>
+    </div>
+    <div class="section-intro" id="intro-onboard"></div>
+    <div id="tasks-onboard"></div>
+    <div id="cert-onboard" class="certificate">
+      <div class="cert-icon">🥇</div>
+      <h2 id="certh-onboard"></h2>
+      <div class="cert-name" id="certname-onboard"></div>
+      <p class="cert-text" id="certt-onboard"></p>
+      <div class="cert-instruction" id="certi-onboard"></div>
+    </div>
+  </div>
+
+  <!-- HOTEL -->
+  <div id="hotel" class="view">
+    <div class="progress-header">
+      <div class="progress-text"><span id="plabel-hotel"></span> <b id="text-progress-hotel">0/0</b></div>
+      <div class="voyage">
+        <div class="voyage-ship" id="ship-hotel">🕵️</div>
+        <div class="voyage-goal">🏨</div>
+        <div class="voyage-track"><div class="voyage-fill" id="progress-hotel"></div></div>
+      </div>
+    </div>
+    <div class="section-intro" id="intro-hotel"></div>
+    <div id="tasks-hotel"></div>
+    <div id="cert-hotel" class="certificate">
+      <div class="cert-icon">🕵️</div>
+      <h2 id="certh-hotel"></h2>
+      <div class="cert-name" id="certname-hotel"></div>
+      <p class="cert-text" id="certt-hotel"></p>
+      <div class="cert-instruction" id="certi-hotel"></div>
+    </div>
+  </div>
+
+  <!-- FAROE -->
+  <div id="faroe" class="view">
+    <div class="progress-header">
+      <div class="progress-text"><span id="plabel-faroe"></span> <b id="text-progress-faroe">0/0</b></div>
+      <div class="voyage">
+        <div class="voyage-ship" id="ship-faroe">🚗</div>
+        <div class="voyage-goal">🌈</div>
+        <div class="voyage-track"><div class="voyage-fill" id="progress-faroe"></div></div>
+      </div>
+    </div>
+    <div class="section-intro" id="intro-faroe"></div>
+    <div id="tasks-faroe"></div>
+    <div id="cert-faroe" class="certificate">
+      <div class="cert-icon">🏆</div>
+      <h2 id="certh-faroe"></h2>
+      <div class="cert-name" id="certname-faroe"></div>
+      <p class="cert-text" id="certt-faroe"></p>
+      <div class="cert-instruction" id="certi-faroe"></div>
+    </div>
+  </div>
+
+  <!-- ALBUM -->
+  <div id="album" class="view">
+    <div class="section-intro" id="intro-album"></div>
+    <div id="albumContent"></div>
+  </div>
+
+</main>
+
+<script>
+(function(){
+'use strict';
+
+/* ============ META: struktur pr. opgave (ikon + inputtype) ============ */
+var META = {
+  onboard: [
+    {icon:"🛟", input:"number"},{icon:"🛎️", input:null},{icon:"🍔", input:"text"},{icon:"🍽️", input:"number"},
+    {icon:"🎶", input:null},{icon:"✨", input:"text"},{icon:"🏊", input:"number"},{icon:"🎮", input:"text"},
+    {icon:"🦅", input:null},{icon:"⬆️", input:"number"},{icon:"🪜", input:"number"},{icon:"🦺", input:null},
+    {icon:"🚁", input:null},{icon:"🐕", input:null},{icon:"🌊", input:null},{icon:"🤳", input:null},
+    {icon:"🍦", input:"text"},{icon:"🌅", input:null}
+  ],
+  hotel: [
+    {icon:"🏨", input:null},{icon:"🌿", input:null},{icon:"🏙️", input:"number"},{icon:"🗣️", input:null},
+    {icon:"🎨", input:null},{icon:"🔢", input:"number"},{icon:"🥞", input:"text"},{icon:"🪟", input:null},
+    {icon:"🧖", input:null},{icon:"🐑", input:"number"}
+  ],
+  faroe: [
+    {icon:"🐑", input:null},{icon:"🏡", input:null},{icon:"💦", input:null},{icon:"🕳️", input:null},
+    {icon:"🐧", input:null},{icon:"🐎", input:null},{icon:"🦆", input:null},{icon:"📬", input:null},
+    {icon:"🐟", input:null},{icon:"☁️", input:null},{icon:"🗽", input:null},{icon:"🎣", input:null},
+    {icon:"⛴️", input:null},{icon:"🪧", input:"text"},{icon:"🌊", input:null},{icon:"⛪", input:null},
+    {icon:"🇫🇴", input:null},{icon:"🚁", input:null},{icon:"🌈", input:null},{icon:"🏞️", input:null}
+  ]
+};
+
+/* ============ OVERSÆTTELSER ============ */
+/* Opgaver: [titel, beskrivelse, fun fact, placeholder] */
+var TR = {
+
+da: {
+  flag:"🇩🇰", label:"Dansk",
+  ui:{
+    titles:{home:"Skattejagt Eventyr", onboard:"🚢 Norröna Mission", hotel:"🏨 Hotel-Detektiv", faroe:"⛰️ Færøerne", album:"📸 Min Fotobog"},
+    back:"❮ Tilbage", pts:"point", defName:"Skattejæger", pickName:"Vælg navn",
+    welcomeH:"Velkommen Ombord!", welcomeP:"Løs opgaver, tag billeder og saml point – kan du nå helt op og blive 🌟 Havets Legende?",
+    menu:{onboard:["Skibet Norröna","Udforsk hele skibet"], hotel:["Hotel-Detektiv","Smyril Lines hoteller i land"], faroe:["Opdag Færøerne","Hemmeligheder i naturen"], album:["Min Fotobog","Alle dine skatte-billeder"]},
+    plabel:{onboard:"Norröna-Mission:", hotel:"Hotel-Mission:", faroe:"Færø-Mission:"},
+    intro:{
+      onboard:"⭐ opgave = 10 point · 📸 billede = 5 bonuspoint. Sejl skibet helt frem til øen 🏝️",
+      hotel:"Smyril Line har sine egne hoteller: Hotel Hafnia og Hotel Brandan i Tórshavn – og Hotel Skálavík på øen Sandoy. Kan du løse detektiv-opgaverne? 🔎",
+      faroe:"Sæt en ⭐ når du spotter tingene i land – og tag et billede som bevis! 📸",
+      album:"📸 Din helt egen fotobog fra rejsen! Alle billeder gemmes kun på denne telefon."
+    },
+    cert:{
+      onboard:["Kaptajnens Bevis","har udforsket hele MS Norröna fra top til bund!","Vis denne skærm til personalet i receptionen – måske vanker der et rigtigt stempel eller en lille præmie! 🎁"],
+      hotel:["Hotel-Detektiv Bevis","har løst alle hotel-mysterier på Færøerne!","Vis beviset i hotellets reception – de bliver helt sikkert imponerede! 🏆"],
+      faroe:["Fjeldfarer Bevis","har fundet alle Færøernes store skatte!","Gem beviset på telefonen og vis det til vennerne derhjemme! 📸"]
+    },
+    albumEmpty:"Endnu ingen billeder! Tryk på 📸-knappen ved en opgave for at komme i gang.",
+    modal:{h:"🗺️ Klar til eventyr?", p:"Vælg din figur og skriv dit navn!", ph:"Dit navn...", btn:"Sæt sejl! ⚓"},
+    langModal:{h:"🌍 Vælg sprog", p:"Choose language · Vel mál · Sprache wählen"},
+    toast:{star:"+10 point! ⭐", photoNew:"Sejt billede! +15 point! 📸⭐", photoBonus:"Billede gemt! +5 bonuspoint! 📸", photoErr:"Hovsa – kunne ikke gemme billedet 😅", welcome:"Velkommen ombord, {n}!"},
+    rankNext:"{p} point til {r}", rankMax:"🏆 Højeste rang – du er en ægte Havets Legende!",
+    ranks:["Landkrabbe","Opdager","Navigatør","Kaptajn","Havets Legende"]
+  },
+  tasks:{
+    onboard:[
+      ["Redningsbåds-Tælleren","Gå en tur på det åbne dæk. Hvor mange store orange redningsbåde kan du tælle?","Norröna kan have ca. 1.482 passagerer med!","Antal..."],
+      ["Skibets Hjerte","Find receptionen på dæk 5. Sig hej og spørg om de har et skibskort til dig!","Receptionen kan hjælpe med næsten alt på rejsen."],
+      ["Madøret Noatun","Find caféen Noatun. Hvad ser allermest lækkert ud?","Noatun var havguden Njords hjem i vikingetiden!","Jeg så..."],
+      ["Den Store Buffet","Find buffet-restauranten Skansagarður. Hvor mange borde kan du tælle gennem vinduet?","Skansagarður er opkaldt efter en gammel færøsk skanse.","Antal borde..."],
+      ["Undirhúsið","Gå ned i Undirhúsið og find scenen, hvor musikerne spiller om aftenen.","Undirhúsið betyder Underhuset på færøsk."],
+      ["Laterna Magica","Gå helt op i Laterna Magica i toppen af skibet. Hvad kan du se ud af de store vinduer?","Laterna Magica betyder Det magiske lys.","Jeg kan se..."],
+      ["Den Skjulte Pool","Der gemmer sig en indendørs pool på skibet! Hvilket dæk ligger den på?","Den ligger på et af de allernederste dæk!","Dæk nr..."],
+      ["Spillerummet","Find stedet med arkademaskiner og spil. Hvilket spil vil du helst prøve?","Perfekt sted, hvis det blæser udenfor!","Spillet hedder..."],
+      ["Falke-Jagten","Find Smyril Lines fugle-logo et sted på skibet og tag et billede af det!","Smyril betyder faktisk dværgfalk på færøsk!"],
+      ["Elevator-Mysteriet","Gå ind i en elevator. Hvad er det højeste dæk-nummer, man kan trykke på?","Skibet er lige så højt som et højhus!","Højeste dæk..."],
+      ["Trappe-Trin","Find en hovedtrappe og tæl trinnene fra dæk 5 op til dæk 6.","Besætningen får masser af gratis motion hver dag!","Antal trin..."],
+      ["Sikkerhed Først","Find et grønt-hvidt skilt, der viser hvordan man tager en redningsvest på.","Sikkerhed er det allervigtigste til søs!"],
+      ["Helikopter-Pladsen","Find det kæmpestore H malet på dækket udenfor. H betyder helikopter!","En redningshelikopter kan fire folk ned lige her."],
+      ["Hunde Ombord?","Spørg en fra personalet: Må man have sin hund med ud at sejle?","Ja! Nogle passagerer har faktisk fire ben."],
+      ["Kølvands-Kiggeren","Gå ud bagpå skibet og kig ned på det hvide skum, skibet laver i vandet.","Skibets skruer under vandet er lavet af kæmpe bronze!"],
+      ["Sømands-Selfien","Tag en selfie med havet i baggrunden – dit sømandsbevis! (Tryk på kameraet)","Måske fanger du en fugl eller en hval i baggrunden!"],
+      ["Is-Ekspeditionen","Find ud af hvor man kan købe is ombord. Hvilken smag er din favorit?","Is smager altid bedst med udsigt over Atlanterhavet.","Min favorit er..."],
+      ["Horisont-Spejderen","Kig ud over havet i 2 minutter. Kan du få øje på et andet skib eller en fugl?","Herude kan der være over 100 km til nærmeste land!"]
+    ],
+    hotel:[
+      ["Havnens Hotel","Find Hotel Hafnia midt i Tórshavn, tæt på havnen. Tag et billede af skiltet!","Hafnia betyder havn på latin – hotellet åbnede allerede i 1951!"],
+      ["Græstags-Husene","Ved Hotel Hafnia står der små hyggelige huse med græs på taget. Kan du finde dem?","Græstaget virker som en varm dyne, når det stormer!"],
+      ["Det Nye Hotel","Find Hotel Brandan – Smyril Lines splinternye hotel. Hvor mange etager kan du tælle?","Hotel Brandan åbnede den 1. juli 2020.","Antal etager..."],
+      ["Sig det på Færøsk","Gå hen til receptionen og sig Góðan dag! (det betyder goddag). Fik du et smil tilbage?","Færøsk minder mere om vikingernes sprog end dansk gør!"],
+      ["Kunst-Jagten","Find et maleri eller kunstværk i hotellets lobby og tag et billede af det.","Mange værker er lavet af færøske kunstnere."],
+      ["Værelses-Matematik","Læg alle tallene i jeres værelsesnummer sammen. Hvad giver det? (fx 214 → 2+1+4 = 7)","Hotel Hafnia har hele 79 værelser!","Summen er..."],
+      ["Morgenmads-Missionen","Hvad er det bedste på morgenbuffeten? Smag noget, du aldrig har prøvet før!","Prøv skyr – det er nordens svar på yoghurt.","Det bedste var..."],
+      ["Udsigts-Fotografen","Tag det flotteste billede du kan fra hotelvinduet eller lige udenfor hoveddøren.","Fra Hafnias tagterrasse kan man se ud over hele havnen!"],
+      ["Hemmelige Rum","Find ud af om hotellet har en sauna eller et motionsrum. Spørg i receptionen!","En varm sauna er skøn efter en kold færø-dag."],
+      ["Ø-Hotellet","Bonus: Smyril Line har også Hotel Skálavík ude på øen Sandoy! Kommer I forbi: tæl fårene udenfor.","Hotel Skálavík ligger lige ned til en sort sandstrand!","Antal får..."]
+    ],
+    faroe:[
+      ["Uld-Totten","Spot et får, der står helt ude ved vejkanten.","Der bor 70.000 får og kun 54.000 mennesker her!"],
+      ["Græs på Taget","Find et hus med græs på taget.","Taget virker som en varm dyne om vinteren."],
+      ["Vandfaldet","Spot vand, der løber ned ad et bjerg.","Øerne har tusindvis af vandfald!"],
+      ["Trylle-Tunnellen","Kør gennem en mørk bjerg-tunnel. Hold vejret hvis du tør!","En tunnel under havet har en rundkørsel med lysshow!"],
+      ["Klovne-Fuglen","Spot en lunde – fuglen med det farvestrålende næb.","Lunden kan fange over 10 fisk i næbbet ad gangen!"],
+      ["Færøsk Hest","Spot en færøsk hest – den er mindre og mere pjusket end danske heste.","En af de ældste hesteracer i hele verden."],
+      ["Løsgående Gæs","Find en gås eller and, der bare går frit rundt i en landsby.","Mange fugle går over vejen præcis som det passer dem."],
+      ["Blå Postkasse","Postkasser er ikke røde som i Danmark – find en blå!","Posta er det færøske postvæsen."],
+      ["Lakse-Ringene","Spot de kæmpestore runde ringe ude i fjorden.","Derinde bor titusindvis af færøske laks."],
+      ["Bjerg i Tåge","Find et bjerg, hvor toppen er helt gemt inde i en sky.","Der kan være sol nede og tåge oppe – samtidig!"],
+      ["Bys-Statuen","Find en sten- eller bronzestatue i Tórshavn.","Mange statuer hylder de modige fiskere."],
+      ["Tørfisken","Spot fisk, der hænger udenfor et hus for at tørre i vinden.","Den salte vind virker som et naturligt køleskab!"],
+      ["Den Lille Færge","Spot en lille lokal færge, der sejler mellem øerne.","Før tunnellerne sejlede man i båd til ALT."],
+      ["Det Skøre Byskilt","Find et bynavn, du slet ikke kan udtale. Prøv at sige det højt tre gange!","Prøv fx at sige Gjógv eller Kirkjubøur!","Byen hed..."],
+      ["Den Vilde Bølge","Spot en bølge, der slår hårdt ind mod klipperne.","Atlanterhavet har nogle af verdens stærkeste bølger."],
+      ["Træ-Kirken","Find en af de gamle sorte trækirker med græstag.","Mange bygder er bygget op omkring deres gamle kirke."],
+      ["Færøernes Flag","Spot det færøske flag – hvidt med blåt og rødt kors.","Flaget hedder Merkið og vajer næsten altid i vinden."],
+      ["Ø-Helikopteren","Se eller hør en helikopter flyve forbi.","Helikopteren er bybussen til de allermindste øer!"],
+      ["Regnbue-Jægeren","Sol og regn på samme tid? Find regnbuen!","Det skøre vejr gør Færøerne til regnbue-mestre."],
+      ["Den Hængende Sø","Find en sø, der ligger højt oppe på et bjerg.","Søen Sørvágsvatn ser ud som om den svæver over havet!"]
+    ]
+  }
+},
+
+fo: {
+  flag:"🇫🇴", label:"Føroyskt",
+  ui:{
+    titles:{home:"Skattaleiting", onboard:"🚢 Norröna Uppgáva", hotel:"🏨 Hotel-Loyndarfólk", faroe:"⛰️ Føroyar", album:"📸 Mín Myndabók"},
+    back:"❮ Aftur", pts:"stig", defName:"Skattaleitari", pickName:"Vel navn",
+    welcomeH:"Vælkomin Umborð!", welcomeP:"Loys uppgávur, tak myndir og savna stig – kanst tú gerast 🌟 Havsins Hetja?",
+    menu:{onboard:["Skipið Norröna","Kanna alt skipið"], hotel:["Hotel-Loyndarfólk","Hotellini hjá Smyril Line"], faroe:["Uppliv Føroyar","Loyndarmál í náttúruni"], album:["Mín Myndabók","Allar tínar skatta-myndir"]},
+    plabel:{onboard:"Norröna-Uppgáva:", hotel:"Hotel-Uppgáva:", faroe:"Føroya-Uppgáva:"},
+    intro:{
+      onboard:"⭐ uppgáva = 10 stig · 📸 mynd = 5 eykastig. Sigl skipinum heilt fram til oynna 🏝️",
+      hotel:"Smyril Line hevur síni egnu hotell: Hotel Hafnia og Hotel Brandan í Havn – og Hotel Skálavík á Sandoynni. Kanst tú loysa uppgávurnar? 🔎",
+      faroe:"Set eina ⭐ tá tú sært lutirnar á landi – og tak eina mynd sum prógv! 📸",
+      album:"📸 Tín egna myndabók frá ferðini! Allar myndir verða bert goymdar á hesi telefonini."
+    },
+    cert:{
+      onboard:["Prógv Skiparans","hevur kannað alt MS Norröna frá toppi til botn!","Vís hendan skermin til starvsfólkið í móttøkuni – kanska fært tú eitt stempul ella eina lítla vinning! 🎁"],
+      hotel:["Hotel-Prógv","hevur loyst allar hotel-gátur í Føroyum!","Vís prógvið í móttøkuni á hotellinum – tey verða ovfarin! 🏆"],
+      faroe:["Fjallafarar-Prógv","hevur funnið allar stóru skattirnar í Føroyum!","Goym prógvið á telefonini og vís tað vinunum heima! 📸"]
+    },
+    albumEmpty:"Ongar myndir enn! Trýst á 📸-knøttin við eini uppgávu fyri at byrja.",
+    modal:{h:"🗺️ Klár/ur til ævintýr?", p:"Vel tína figur og skriva títt navn!", ph:"Títt navn...", btn:"Set segl! ⚓"},
+    langModal:{h:"🌍 Vel mál", p:"Vælg sprog · Choose language · Sprache wählen"},
+    toast:{star:"+10 stig! ⭐", photoNew:"Fitt mynd! +15 stig! 📸⭐", photoBonus:"Mynd goymd! +5 eykastig! 📸", photoErr:"Ups – fekk ikki goymt myndina 😅", welcome:"Vælkomin umborð, {n}!"},
+    rankNext:"{p} stig til {r}", rankMax:"🏆 Hægsta stig – tú ert ein sonn Havsins Hetja!",
+    ranks:["Landkrabbi","Kannari","Leiðavísari","Skipari","Havsins Hetja"]
+  },
+  tasks:{
+    onboard:[
+      ["Bjargingarbáta-Teljarin","Gakk ein túr á opna dekkinum. Hvussu nógvar stórar appelsingular bjargingarbátar telur tú?","Norröna kann hava uml. 1.482 ferðafólk við!","Tal..."],
+      ["Hjartað á Skipinum","Finn móttøkuna á dekki 5. Sig hey og spyr, um tey hava eitt skipskort til tín!","Móttøkan kann hjálpa við næstan øllum á ferðini."],
+      ["Matstaðurin Noatun","Finn kaffistovuna Noatun. Hvat sær mest gott út?","Noatun var heimið hjá havgudinum Njørði í víkingatíðini!","Eg sá..."],
+      ["Stóra Borðreiðslan","Finn matstovuna Skansagarður. Hvussu nógv borð telur tú gjøgnum vindeygað?","Skansagarður er nevndur eftir gomlum føroyskum skansa.","Tal av borðum..."],
+      ["Undirhúsið","Far niður í Undirhúsið og finn pallin, har tónleikarar spæla um kvøldið.","Í Undirhúsinum er stuttligt um kvøldið!"],
+      ["Laterna Magica","Far heilt upp í Laterna Magica ovast á skipinum. Hvat sært tú út gjøgnum tey stóru vindeyguni?","Laterna Magica merkir Gandaljósið.","Eg síggi..."],
+      ["Fjaldi Svimjihylurin","Ein fjaldur svimjihylur er umborð! Á hvørjum dekki er hann?","Hann er á einum av teimum niðastu dekkunum!","Dekk nr..."],
+      ["Spælirúmið","Finn staðið við spælimaskinum. Hvat spæl vilt tú helst royna?","Gott stað, tá tað blæsur úti!","Spælið eitur..."],
+      ["Falka-Leitingin","Finn fuglamerkið hjá Smyril Line onkustaðni á skipinum og tak eina mynd!","Smyril er ein lítil falkur!"],
+      ["Lyftu-Gátan","Far inn í eina lyftu. Hvat er hægsta dekk-talið, tú kanst trýsta á?","Skipið er so høgt sum eitt høgt hús!","Hægsta dekk..."],
+      ["Trappustig","Finn eina høvuðstrappu og tel trinini frá dekki 5 upp á dekk 6.","Manningin fær nógva rørslu hvønn dag!","Tal av trinum..."],
+      ["Trygd Fyrst","Finn eitt grønt og hvítt skelti, sum vísir hvussu tú fert í bjargingarvest.","Trygd er tað týdningarmesta á sjónum!"],
+      ["Helikoptara-Plássið","Finn tað stóra H, sum er málað á dekkinum úti. H merkir helikoptari!","Ein bjargingarhelikoptari kann síga fólk niður her."],
+      ["Hundar Umborð?","Spyr onkran í manningini: Sleppa hundar við umborð?","Ja! Summi ferðafólk hava fýra bein."],
+      ["Kjølvatns-Hyggjarin","Far aftast á skipið og hygg at hvíta skúminum í sjónum.","Skrúvurnar undir sjónum eru úr stórari bronsu!"],
+      ["Sjómans-Selfie","Tak eina selfie við havinum í bakgrundini! (Trýst á myndatólið)","Kanska sært tú ein fugl ella ein hval aftanfyri!"],
+      ["Ís-Ferðin","Finn út av, hvar tú kanst keypa ís umborð. Hvat er tín yndissmakkur?","Ísur smakkar best við útsýni yvir havið.","Mín yndis er..."],
+      ["Sjóndeildar-Spæjarin","Hygg út yvir havið í 2 minuttir. Sært tú eitt annað skip ella ein fugl?","Her úti kunnu vera meira enn 100 km til næsta land!"]
+    ],
+    hotel:[
+      ["Hotellið við Havnina","Finn Hotel Hafnia mitt í Havn, tætt við havnina. Tak eina mynd av skeltinum!","Hafnia merkir havn á latíni – hotellið læt upp í 1951!"],
+      ["Grastak-Húsini","Við Hotel Hafnia standa smá hús við grastaki. Finnur tú tey?","Grastakið er sum ein heit dyna í ódnarveðri!"],
+      ["Nýggja Hotellið","Finn Hotel Brandan – splunkunýggja hotellið hjá Smyril Line. Hvussu nógvar hæddir telur tú?","Hotel Brandan læt upp 1. juli 2020.","Tal av hæddum..."],
+      ["Sig tað á Føroyskum","Far til móttøkuna og sig Góðan dag! Fekst tú eitt smíl aftur?","Føroyskt líkist víkingamálinum meira enn danskt!"],
+      ["Lista-Leitingin","Finn eitt málningaverk í hotellinum og tak eina mynd av tí.","Nógv verk eru gjørd av føroyskum listafólki."],
+      ["Kamar-Rokning","Legg øll tølini í tykkara kamarnummari saman. Hvat verður tað? (t.d. 214 → 2+1+4 = 7)","Hotel Hafnia hevur heili 79 kømur!","Samlað..."],
+      ["Morgunmats-Uppgávan","Hvat er tað besta á morgunborðinum? Smakka okkurt, tú ongantíð hevur roynt!","Royn skyr – tað er sera gott!","Tað besta var..."],
+      ["Útsýnis-Myndatøkarin","Tak so vakra mynd, tú kanst, úr hotelvindeyganum ella beint uttanfyri.","Frá takterrassuni á Hafnia sæst øll havnin!"],
+      ["Loyndu Rúmini","Finn út av, um hotellið hevur savnu ella venjingarrúm. Spyr í móttøkuni!","Ein heit savna er góð eftir ein kaldan dag."],
+      ["Oyggja-Hotellið","Eyka: Smyril Line hevur eisini Hotel Skálavík á Sandoynni! Koma tit har: tel seyðin uttanfyri.","Hotel Skálavík liggur við eina svarta sandstrond!","Tal av seyði..."]
+    ],
+    faroe:[
+      ["Ullar-Tutti","Síggj ein seyð, sum stendur við vegin.","Her búgva 70.000 seyðir og bert 54.000 fólk!"],
+      ["Gras á Takinum","Finn eitt hús við grasi á takinum.","Takið er sum ein heit dyna um veturin."],
+      ["Fossurin","Síggj vatn, sum rennur niður eftir fjallinum.","Oyggjarnar hava túsundtals fossar!"],
+      ["Gandakendi Tunnilin","Koyr gjøgnum ein myrkan tunnil. Halt andanum, um tú torir!","Ein tunnil undir havinum hevur eina rundkoyring við ljósum!"],
+      ["Lundin","Síggj ein lunda – fuglin við tí litføgru nevi.","Lundin kann bera meira enn 10 fiskar í nevinum!"],
+      ["Føroyska Rossið","Síggj eitt føroyskt ross – tað er minni og loðnari enn onnur ross.","Eitt av elstu rossasløgum í heiminum."],
+      ["Leysar Gæs","Finn eina gás ella ont, sum gongur leys í bygdini.","Nógvir fuglar ganga bara yvir vegin."],
+      ["Blái Postkassin","Finn ein bláan postkassa!","Posta er føroyska postverkið."],
+      ["Laksa-Ringarnir","Síggj teir stóru rundu ringarnar úti á firðinum.","Har búgva túsundtals føroyskir laksar."],
+      ["Fjall í Mjørka","Finn eitt fjall, har toppurin er fjaldur í einum skýggi.","Tað kann vera sól niðri og mjørki uppi – samstundis!"],
+      ["Styttan í Havn","Finn eina styttu úr steini ella bronsu í Havn.","Nógvar styttur heiðra fiskimenninar."],
+      ["Turkaði Fiskurin","Síggj fisk, sum hongur úti at turka í vindinum.","Salti vindurin er sum eitt kølisskáp!"],
+      ["Lítla Ferjan","Síggj eina lítla ferju, sum siglir millum oyggjarnar.","Áðrenn tunlarnir komu, fór alt við báti."],
+      ["Stuttliga Bygdanavnið","Finn eitt bygdanavn, sum gestir ikki kunnu siga. Sig tað hart tríggjar ferðir!","Royn t.d. at siga Gjógv ella Kirkjubøur!","Bygdin æt..."],
+      ["Villa Aldan","Síggj eina aldu, sum slær hart móti berginum.","Atlantshavið hevur nakrar av sterkastu aldum í heiminum."],
+      ["Træ-Kirkjan","Finn eina av teimum gomlu svørtu trækirkjunum við grastaki.","Nógvar bygdir vaksu upp rundan um kirkjuna."],
+      ["Merkið","Síggj føroyska flaggið – hvítt við bláum og reyðum krossi.","Flaggið eitur Merkið."],
+      ["Helikoptarin","Síggj ella hoyr ein helikoptara flúgva framvið.","Helikoptarin er bussurin til smæstu oyggjarnar!"],
+      ["Ælaboga-Jagarin","Sól og regn í senn? Finn ælabogan!","Skiftandi veðrið ger Føroyar til ælaboga-meistarar!"],
+      ["Hangandi Vatnið","Finn eitt vatn, sum liggur høgt uppi í fjøllunum.","Sørvágsvatn sær út, sum tað svevur yvir havinum!"]
+    ]
+  }
+},
+
+en: {
+  flag:"🇬🇧", label:"English",
+  ui:{
+    titles:{home:"Treasure Hunt Adventure", onboard:"🚢 Norröna Mission", hotel:"🏨 Hotel Detective", faroe:"⛰️ Faroe Islands", album:"📸 My Photo Book"},
+    back:"❮ Back", pts:"points", defName:"Treasure Hunter", pickName:"Pick a name",
+    welcomeH:"Welcome Aboard!", welcomeP:"Solve missions, take photos and collect points – can you rise all the way to 🌟 Sea Legend?",
+    menu:{onboard:["The Ship Norröna","Explore the whole ship"], hotel:["Hotel Detective","Smyril Line hotels ashore"], faroe:["Discover the Faroes","Secrets in nature"], album:["My Photo Book","All your treasure photos"]},
+    plabel:{onboard:"Norröna Mission:", hotel:"Hotel Mission:", faroe:"Faroe Mission:"},
+    intro:{
+      onboard:"⭐ mission = 10 points · 📸 photo = 5 bonus points. Sail the ship all the way to the island 🏝️",
+      hotel:"Smyril Line has its own hotels: Hotel Hafnia and Hotel Brandan in Tórshavn – and Hotel Skálavík on the island of Sandoy. Can you crack the detective missions? 🔎",
+      faroe:"Tap a ⭐ when you spot these things ashore – and take a photo as proof! 📸",
+      album:"📸 Your very own photo book from the trip! All photos are stored only on this phone."
+    },
+    cert:{
+      onboard:["Captain's Certificate","has explored all of MS Norröna from top to bottom!","Show this screen to the staff at reception – maybe there is a real stamp or a small prize! 🎁"],
+      hotel:["Hotel Detective Certificate","has solved every hotel mystery in the Faroes!","Show this certificate at the hotel reception – they will be impressed! 🏆"],
+      faroe:["Mountain Explorer Certificate","has found all the great treasures of the Faroe Islands!","Save this on the phone and show your friends back home! 📸"]
+    },
+    albumEmpty:"No photos yet! Tap the 📸 button on a mission to get started.",
+    modal:{h:"🗺️ Ready for adventure?", p:"Pick your character and write your name!", ph:"Your name...", btn:"Set sail! ⚓"},
+    langModal:{h:"🌍 Choose language", p:"Vælg sprog · Vel mál · Sprache wählen"},
+    toast:{star:"+10 points! ⭐", photoNew:"Great photo! +15 points! 📸⭐", photoBonus:"Photo saved! +5 bonus points! 📸", photoErr:"Oops – could not save the photo 😅", welcome:"Welcome aboard, {n}!"},
+    rankNext:"{p} points to {r}", rankMax:"🏆 Highest rank – you are a true Sea Legend!",
+    ranks:["Landlubber","Explorer","Navigator","Captain","Sea Legend"]
+  },
+  tasks:{
+    onboard:[
+      ["Lifeboat Counter","Take a walk on the open deck. How many big orange lifeboats can you count?","Norröna can carry about 1,482 passengers!","How many..."],
+      ["Heart of the Ship","Find the reception on deck 5. Say hello and ask if they have a ship map for you!","The reception can help with almost anything."],
+      ["Food Stop Noatun","Find the café Noatun. What looks the most delicious?","Noatun was the home of the sea god Njord in Viking times!","I saw..."],
+      ["The Grand Buffet","Find the buffet restaurant Skansagarður. How many tables can you count through the window?","Skansagarður is named after an old Faroese fortification.","Tables..."],
+      ["Undirhúsið","Go down to Undirhúsið and find the stage where musicians play at night.","Undirhúsið means The Lower House in Faroese."],
+      ["Laterna Magica","Go all the way up to Laterna Magica at the top of the ship. What can you see through the big windows?","Laterna Magica means The Magic Light.","I can see..."],
+      ["The Hidden Pool","A hidden indoor pool is on board! Which deck is it on?","It is on one of the lowest decks!","Deck no..."],
+      ["The Game Room","Find the arcade machines. Which game do you want to try the most?","Perfect when it is windy outside!","The game is..."],
+      ["Falcon Hunt","Find the Smyril Line bird logo somewhere on the ship and take a photo!","Smyril means merlin – a small falcon – in Faroese!"],
+      ["Elevator Mystery","Get in an elevator. What is the highest deck number you can press?","The ship is as tall as a high-rise building!","Highest deck..."],
+      ["Stair Steps","Find a main staircase and count the steps from deck 5 up to deck 6.","The crew gets lots of free exercise every day!","Steps..."],
+      ["Safety First","Find a green-and-white sign showing how to put on a life vest.","Safety is the most important thing at sea!"],
+      ["Helipad","Find the huge H painted on the outside deck. H is for helicopter!","A rescue helicopter can lower people right here."],
+      ["Dogs On Board?","Ask a crew member: Are dogs allowed on the ship?","Yes! Some passengers actually have four legs."],
+      ["Wake Watcher","Go to the back of the ship and look down at the white foam trail.","The propellers under the water are made of giant bronze!"],
+      ["Sailor Selfie","Take a selfie with the ocean in the background – your sailor proof! (Tap the camera)","Maybe you will catch a bird or a whale in the background!"],
+      ["Ice Cream Expedition","Find out where to buy ice cream on board. What is your favourite flavour?","Ice cream always tastes best with an ocean view.","My favourite is..."],
+      ["Horizon Scout","Look out over the sea for 2 minutes. Can you spot another ship or a bird?","Out here the nearest land can be over 100 km away!"]
+    ],
+    hotel:[
+      ["The Harbour Hotel","Find Hotel Hafnia in the middle of Tórshavn, close to the harbour. Take a photo of the sign!","Hafnia means harbour in Latin – the hotel opened back in 1951!"],
+      ["Grass-Roof Cottages","Cosy little grass-roofed cottages stand by Hotel Hafnia. Can you find them?","A grass roof works like a warm blanket in a storm!"],
+      ["The Brand New Hotel","Find Hotel Brandan – Smyril Line's brand new hotel. How many floors can you count?","Hotel Brandan opened on 1 July 2020.","Floors..."],
+      ["Say It in Faroese","Go to the reception and say Góðan dag! (it means good day). Did you get a smile back?","Faroese is closer to the Viking language than Danish is!"],
+      ["Art Hunt","Find a painting or artwork in the hotel lobby and take a photo of it.","Many works are made by Faroese artists."],
+      ["Room Number Maths","Add up all the digits in your room number. What do you get? (e.g. 214 → 2+1+4 = 7)","Hotel Hafnia has 79 rooms!","The sum is..."],
+      ["Breakfast Mission","What is the best thing at the breakfast buffet? Taste something you have never tried!","Try skyr – the Nordic answer to yogurt.","The best was..."],
+      ["View Photographer","Take the most beautiful photo you can from the hotel window or just outside the door.","From Hafnia's roof terrace you can see the whole harbour!"],
+      ["Secret Rooms","Find out if the hotel has a sauna or a gym. Ask at the reception!","A hot sauna feels great after a cold Faroe day."],
+      ["The Island Hotel","Bonus: Smyril Line also has Hotel Skálavík on the island of Sandoy! If you visit: count the sheep outside.","Hotel Skálavík sits right by a black sand beach!","Sheep..."]
+    ],
+    faroe:[
+      ["Woolly Wanderer","Spot a sheep standing right by the road.","70,000 sheep and only 54,000 people live here!"],
+      ["Grass on the Roof","Find a house with grass growing on the roof.","It works like a warm blanket in winter."],
+      ["The Waterfall","Spot water running down a mountainside.","The islands have thousands of waterfalls!"],
+      ["The Magic Tunnel","Drive through a dark mountain tunnel. Hold your breath if you dare!","One undersea tunnel even has a roundabout with a light show!"],
+      ["The Clown Bird","Spot a puffin – the bird with the colourful beak.","A puffin can hold over 10 fish in its beak at once!"],
+      ["Faroese Horse","Spot a Faroese horse – smaller and shaggier than most.","One of the oldest horse breeds in the world."],
+      ["Free-Range Geese","Find a goose or duck walking freely around a village.","Many birds cross the road whenever they like."],
+      ["The Blue Postbox","Postboxes here are not red like elsewhere – find a blue one!","Posta is the Faroese postal service."],
+      ["Salmon Rings","Spot the giant round rings out in the fjord.","Tens of thousands of Faroese salmon live inside."],
+      ["Mountain in Fog","Find a mountain with its top hidden inside a cloud.","It can be sunny below and foggy on top – at the same time!"],
+      ["The Town Statue","Find a stone or bronze statue in Tórshavn.","Many statues honour the brave fishermen."],
+      ["Dried Fish","Spot fish hanging outside a house to dry in the wind.","The salty wind works like a natural fridge!"],
+      ["The Little Ferry","Spot a small local ferry sailing between the islands.","Before the tunnels, everything travelled by boat."],
+      ["The Tricky Town Sign","Find a town name you cannot pronounce. Try saying it out loud three times!","Try saying Gjógv or Kirkjubøur!","The town was..."],
+      ["The Wild Wave","Spot a wave crashing hard against the cliffs.","The Atlantic has some of the strongest waves in the world."],
+      ["The Wooden Church","Find one of the old black wooden churches with a grass roof.","Many villages grew up around their old church."],
+      ["The Faroese Flag","Spot the Faroese flag – white with a blue and red cross.","The flag is called Merkið and almost always flies in the wind."],
+      ["Island Helicopter","See or hear a helicopter fly past.","The helicopter is the bus to the smallest islands!"],
+      ["Rainbow Hunter","Sun and rain at the same time? Find the rainbow!","The crazy weather makes the Faroes rainbow champions."],
+      ["The Hanging Lake","Find a lake lying high up on a mountain.","Lake Sørvágsvatn looks like it floats above the ocean!"]
+    ]
+  }
+},
+
+de: {
+  flag:"🇩🇪", label:"Deutsch",
+  ui:{
+    titles:{home:"Schatzsuche-Abenteuer", onboard:"🚢 Norröna-Mission", hotel:"🏨 Hotel-Detektiv", faroe:"⛰️ Färöer", album:"📸 Mein Fotobuch"},
+    back:"❮ Zurück", pts:"Punkte", defName:"Schatzsucher-Ass", pickName:"Name wählen",
+    welcomeH:"Willkommen an Bord!", welcomeP:"Löse Missionen, mach Fotos und sammle Punkte – schaffst du es bis zur 🌟 Meereslegende?",
+    menu:{onboard:["Das Schiff Norröna","Erkunde das ganze Schiff"], hotel:["Hotel-Detektiv","Smyril Line Hotels an Land"], faroe:["Entdecke die Färöer","Geheimnisse der Natur"], album:["Mein Fotobuch","Alle deine Schatz-Fotos"]},
+    plabel:{onboard:"Norröna-Mission:", hotel:"Hotel-Mission:", faroe:"Färöer-Mission:"},
+    intro:{
+      onboard:"⭐ Mission = 10 Punkte · 📸 Foto = 5 Bonuspunkte. Steuere das Schiff bis zur Insel 🏝️",
+      hotel:"Smyril Line hat eigene Hotels: Hotel Hafnia und Hotel Brandan in Tórshavn – und Hotel Skálavík auf der Insel Sandoy. Kannst du die Detektiv-Missionen lösen? 🔎",
+      faroe:"Tippe auf ⭐ wenn du diese Dinge an Land entdeckst – und mach ein Foto als Beweis! 📸",
+      album:"📸 Dein eigenes Fotobuch von der Reise! Alle Fotos bleiben nur auf diesem Handy."
+    },
+    cert:{
+      onboard:["Kapitäns-Urkunde","hat die ganze MS Norröna von oben bis unten erkundet!","Zeig diesen Bildschirm an der Rezeption – vielleicht gibt es einen echten Stempel oder einen kleinen Preis! 🎁"],
+      hotel:["Hotel-Detektiv-Urkunde","hat alle Hotel-Rätsel auf den Färöern gelöst!","Zeig die Urkunde an der Hotelrezeption – sie werden staunen! 🏆"],
+      faroe:["Bergwanderer-Urkunde","hat alle großen Schätze der Färöer gefunden!","Speichere die Urkunde und zeig sie deinen Freunden zu Hause! 📸"]
+    },
+    albumEmpty:"Noch keine Fotos! Tippe bei einer Mission auf 📸 um loszulegen.",
+    modal:{h:"🗺️ Bereit fürs Abenteuer?", p:"Wähle deine Figur und schreib deinen Namen!", ph:"Dein Name...", btn:"Leinen los! ⚓"},
+    langModal:{h:"🌍 Sprache wählen", p:"Vælg sprog · Vel mál · Choose language"},
+    toast:{star:"+10 Punkte! ⭐", photoNew:"Tolles Foto! +15 Punkte! 📸⭐", photoBonus:"Foto gespeichert! +5 Bonuspunkte! 📸", photoErr:"Ups – Foto konnte nicht gespeichert werden 😅", welcome:"Willkommen an Bord, {n}!"},
+    rankNext:"Noch {p} Punkte bis {r}", rankMax:"🏆 Höchster Rang – du bist eine echte Meereslegende!",
+    ranks:["Landratte","Entdecker-Ass","Navigations-Profi","Kapitän","Meereslegende"]
+  },
+  tasks:{
+    onboard:[
+      ["Rettungsboot-Zähler","Geh an Deck spazieren. Wie viele große orange Rettungsboote kannst du zählen?","Die Norröna kann ca. 1.482 Passagiere befördern!","Anzahl..."],
+      ["Das Herz des Schiffes","Finde die Rezeption auf Deck 5. Sag hallo und frag, ob sie einen Schiffsplan für dich haben!","Die Rezeption hilft bei fast allem."],
+      ["Futterstopp Noatun","Finde das Café Noatun. Was sieht am leckersten aus?","Noatun war das Heim des Meeresgottes Njörd in der Wikingerzeit!","Ich sah..."],
+      ["Das große Buffet","Finde das Buffet-Restaurant Skansagarður. Wie viele Tische zählst du durchs Fenster?","Skansagarður ist nach einer alten färöischen Schanze benannt.","Tische..."],
+      ["Undirhúsið","Geh hinunter ins Undirhúsið und finde die Bühne, wo abends Musik gespielt wird.","Undirhúsið bedeutet Unterhaus auf Färöisch."],
+      ["Laterna Magica","Geh ganz nach oben in die Laterna Magica. Was siehst du durch die großen Fenster?","Laterna Magica bedeutet Das magische Licht.","Ich sehe..."],
+      ["Der versteckte Pool","Es gibt einen versteckten Pool an Bord! Auf welchem Deck ist er?","Er ist ganz weit unten!","Deck Nr..."],
+      ["Der Spieleraum","Finde die Spielautomaten. Welches Spiel willst du am liebsten ausprobieren?","Perfekt, wenn es draußen stürmt!","Das Spiel heißt..."],
+      ["Falken-Jagd","Finde das Vogel-Logo von Smyril Line irgendwo am Schiff und mach ein Foto!","Smyril heißt Merlin-Falke auf Färöisch!"],
+      ["Fahrstuhl-Rätsel","Steig in einen Fahrstuhl. Welches ist die höchste Deck-Nummer?","Das Schiff ist so hoch wie ein Hochhaus!","Höchstes Deck..."],
+      ["Treppenstufen","Finde eine Haupttreppe und zähle die Stufen von Deck 5 bis Deck 6.","Die Crew bekommt jeden Tag Gratis-Sport!","Stufen..."],
+      ["Sicherheit zuerst","Finde ein grün-weißes Schild, das zeigt, wie man eine Rettungsweste anlegt.","Sicherheit ist auf See das Wichtigste!"],
+      ["Der Hubschrauberplatz","Finde das riesige H auf dem Außendeck. H wie Hubschrauber!","Ein Rettungshubschrauber kann hier Menschen abseilen."],
+      ["Hunde an Bord?","Frag die Crew: Dürfen Hunde mitfahren?","Ja! Manche Passagiere haben tatsächlich vier Beine."],
+      ["Kielwasser-Gucker","Geh ans Heck und schau auf die weiße Schaumspur im Wasser.","Die Schiffsschrauben sind aus riesiger Bronze!"],
+      ["Seemanns-Selfie","Mach ein Selfie mit dem Meer im Hintergrund – dein Seemannsbeweis! (Tippe auf die Kamera)","Vielleicht ist ein Vogel oder ein Wal im Bild!"],
+      ["Eis-Expedition","Finde heraus, wo es an Bord Eis gibt. Was ist deine Lieblingssorte?","Eis schmeckt mit Meerblick am besten.","Meine Lieblingssorte..."],
+      ["Horizont-Späher","Schau 2 Minuten aufs Meer hinaus. Entdeckst du ein anderes Schiff oder einen Vogel?","Das nächste Land kann über 100 km entfernt sein!"]
+    ],
+    hotel:[
+      ["Das Hafenhotel","Finde Hotel Hafnia mitten in Tórshavn, nah am Hafen. Mach ein Foto vom Schild!","Hafnia heißt Hafen auf Latein – eröffnet schon 1951!"],
+      ["Die Grasdach-Häuschen","Beim Hotel Hafnia stehen kleine Häuschen mit Grasdach. Findest du sie?","Ein Grasdach wirkt im Sturm wie eine warme Decke!"],
+      ["Das nagelneue Hotel","Finde Hotel Brandan – das brandneue Hotel von Smyril Line. Wie viele Etagen zählst du?","Hotel Brandan wurde am 1. Juli 2020 eröffnet.","Etagen..."],
+      ["Sag es auf Färöisch","Geh zur Rezeption und sag Góðan dag! (das heißt Guten Tag). Hast du ein Lächeln bekommen?","Färöisch ist der Wikingersprache näher als Dänisch!"],
+      ["Kunst-Jagd","Finde ein Gemälde oder Kunstwerk in der Hotellobby und fotografiere es.","Viele Werke stammen von färöischen Kunstschaffenden."],
+      ["Zimmernummer-Mathe","Addiere alle Ziffern eurer Zimmernummer. Was kommt heraus? (z.B. 214 → 2+1+4 = 7)","Hotel Hafnia hat ganze 79 Zimmer!","Die Summe ist..."],
+      ["Frühstücks-Mission","Was ist das Beste am Frühstücksbuffet? Probiere etwas, das du noch nie gegessen hast!","Probier Skyr – die nordische Antwort auf Joghurt.","Am besten war..."],
+      ["Aussichts-Fotograf","Mach das schönste Foto, das du kannst – aus dem Hotelfenster oder direkt vor der Tür.","Von Hafnias Dachterrasse sieht man den ganzen Hafen!"],
+      ["Geheime Räume","Finde heraus, ob das Hotel eine Sauna oder ein Fitnessstudio hat. Frag an der Rezeption!","Eine heiße Sauna nach einem kalten Färöer-Tag – herrlich!"],
+      ["Das Insel-Hotel","Bonus: Smyril Line hat auch Hotel Skálavík auf der Insel Sandoy! Wenn ihr dort seid: Zähle die Schafe draußen.","Hotel Skálavík liegt direkt an einem schwarzen Sandstrand!","Schafe..."]
+    ],
+    faroe:[
+      ["Das Wollknäuel","Entdecke ein Schaf direkt am Straßenrand.","Hier leben 70.000 Schafe und nur 54.000 Menschen!"],
+      ["Gras auf dem Dach","Finde ein Haus mit Gras auf dem Dach.","Es wirkt im Winter wie eine warme Decke."],
+      ["Der Wasserfall","Entdecke Wasser, das einen Berg hinunterläuft.","Die Inseln haben tausende Wasserfälle!"],
+      ["Der Zaubertunnel","Fahr durch einen dunklen Bergtunnel. Halte die Luft an, wenn du dich traust!","Ein Unterwassertunnel hat sogar einen Kreisel mit Lichtshow!"],
+      ["Der Clown-Vogel","Entdecke einen Papageitaucher – den Vogel mit dem bunten Schnabel.","Er kann über 10 Fische gleichzeitig im Schnabel halten!"],
+      ["Färöer-Pony","Entdecke ein färöisches Pferd – kleiner und zotteliger als andere.","Eine der ältesten Pferderassen der Welt."],
+      ["Freilaufende Gänse","Finde eine Gans oder Ente, die frei durchs Dorf spaziert.","Viele Vögel gehen einfach über die Straße."],
+      ["Der blaue Briefkasten","Briefkästen sind hier nicht rot – finde einen blauen!","Posta ist die färöische Post."],
+      ["Die Lachs-Ringe","Entdecke die riesigen runden Ringe draußen im Fjord.","Darin leben zehntausende färöische Lachse."],
+      ["Berg im Nebel","Finde einen Berg, dessen Spitze in einer Wolke versteckt ist.","Unten Sonne, oben Nebel – gleichzeitig!"],
+      ["Die Stadt-Statue","Finde eine Stein- oder Bronzestatue in Tórshavn.","Viele Statuen ehren die mutigen Fischer."],
+      ["Der Trockenfisch","Entdecke Fische, die draußen im Wind trocknen.","Der salzige Wind ist wie ein Naturkühlschrank!"],
+      ["Die kleine Fähre","Entdecke eine kleine Fähre zwischen den Inseln.","Vor den Tunneln ging alles per Boot."],
+      ["Das verrückte Ortsschild","Finde einen Ortsnamen, den du nicht aussprechen kannst. Sag ihn dreimal laut!","Versuch mal Gjógv oder Kirkjubøur!","Der Ort hieß..."],
+      ["Die wilde Welle","Entdecke eine Welle, die hart gegen die Klippen kracht.","Der Atlantik hat einige der stärksten Wellen der Welt."],
+      ["Die Holzkirche","Finde eine der alten schwarzen Holzkirchen mit Grasdach.","Viele Dörfer entstanden rund um ihre alte Kirche."],
+      ["Die Färöer-Flagge","Entdecke die färöische Flagge – weiß mit blau-rotem Kreuz.","Die Flagge heißt Merkið und weht fast immer im Wind."],
+      ["Der Insel-Hubschrauber","Sieh oder höre einen Hubschrauber vorbeifliegen.","Der Hubschrauber ist der Bus zu den kleinsten Inseln!"],
+      ["Regenbogen-Jäger","Sonne und Regen zugleich? Finde den Regenbogen!","Das verrückte Wetter macht die Färöer zu Regenbogen-Meistern."],
+      ["Der hängende See","Finde einen See, der hoch oben am Berg liegt.","Der Sørvágsvatn scheint über dem Meer zu schweben!"]
+    ]
+  }
+}
+};
+
+var LANG_ORDER = ["da","fo","en","de"];
+var AVATARS = ["🦊","🐻","🦄","🐙","🦈","🐬","🦅","🐳"];
+var RANK_META = [
+  {min:0,   icon:"🦀"},
+  {min:80,  icon:"🧭"},
+  {min:200, icon:"🗺️"},
+  {min:350, icon:"👑"},
+  {min:500, icon:"🌟"}
+];
+var PTS_CHECK = 10, PTS_PHOTO = 5;
+var STORE = "norrona-hunt-v5";
+
+/* ============ SAFE STORAGE ============ */
+var mem = {};
+var storage = {
+  get: function(k){ try{ var v = localStorage.getItem(k); return v !== null ? v : (k in mem ? mem[k] : null); }catch(e){ return k in mem ? mem[k] : null; } },
+  set: function(k,v){ mem[k]=v; try{ localStorage.setItem(k,v); }catch(e){} },
+  remove: function(k){ delete mem[k]; try{ localStorage.removeItem(k); }catch(e){} },
+  keys: function(){
+    var ks = {};
+    try{ for(var i=0;i<localStorage.length;i++){ ks[localStorage.key(i)] = 1; } }catch(e){}
+    for(var k in mem){ ks[k] = 1; }
+    return Object.keys(ks);
+  }
+};
+
+/* ============ STATE ============ */
+var state = {name:"", avatar:"🦊", lang:"da", checks:{}, inputs:{}};
+var currentView = "home";
+
+function loadState(){
+  try{
+    var s = JSON.parse(storage.get(STORE));
+    if(s){
+      state.name = s.name||""; state.avatar = s.avatar||"🦊";
+      state.lang = TR[s.lang] ? s.lang : "da";
+      state.checks = s.checks||{}; state.inputs = s.inputs||{};
+    }
+  }catch(e){}
+}
+function saveState(){ storage.set(STORE, JSON.stringify(state)); }
+function photoKey(id){ return "norrona-photo-"+id; }
+function getPhoto(id){ return storage.get(photoKey(id)); }
+function L(){ return TR[state.lang]; }
+
+/* ============ HELPERS ============ */
+function el(tag, cls, text){
+  var e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(text !== undefined) e.textContent = text;
+  return e;
+}
+function $(id){ return document.getElementById(id); }
+
+/* ============ RENDER TASKS ============ */
+function renderSection(cat){
+  var host = $("tasks-"+cat);
+  host.innerHTML = "";
+  var trTasks = L().tasks[cat];
+  META[cat].forEach(function(m, i){
+    var id = cat+"-"+i;
+    var t = trTasks[i];
+    var checked = !!state.checks[id];
+    var photo = getPhoto(id);
+
+    var card = el("div", "task-card"+(checked?" completed":""));
+    card.id = "card-"+id;
+    card.appendChild(el("div","task-pts","+"+(PTS_CHECK+PTS_PHOTO)+" 🪙"));
+
+    var head = el("div","task-header");
+    head.appendChild(el("div","task-icon", m.icon));
+    var content = el("div","task-content");
+    content.appendChild(el("div","task-title", (i+1)+". "+t[0]));
+    content.appendChild(el("div","task-desc", t[1]));
+    content.appendChild(el("div","fun-fact", "💡 "+t[2]));
+    head.appendChild(content);
+    card.appendChild(head);
+
+    var action = el("div","task-action");
+    if(m.input){
+      var inp = el("input","task-input");
+      inp.type = m.input;
+      inp.placeholder = t[3] || "";
+      inp.value = state.inputs[id] || "";
+      inp.addEventListener("input", function(){ state.inputs[id] = inp.value; saveState(); });
+      action.appendChild(inp);
+    } else {
+      action.appendChild(el("div","spacer"));
+    }
+
+    var cam = el("label","camera-btn"+(photo?" has-photo":""));
+    cam.id = "cam-"+id;
+    cam.appendChild(document.createTextNode("📸"));
+    var file = el("input","file-input");
+    file.type = "file";
+    file.accept = "image/*";
+    file.setAttribute("capture","environment");
+    file.addEventListener("change", function(){ handlePhoto(file, id, cat); });
+    cam.appendChild(file);
+    action.appendChild(cam);
+
+    var chk = el("button","check-btn"+(checked?" on":""));
+    chk.type = "button";
+    chk.id = "chk-"+id;
+    chk.innerHTML = '<span class="star">⭐</span>';
+    chk.addEventListener("click", function(){ toggleTask(id, cat); });
+    action.appendChild(chk);
+
+    card.appendChild(action);
+
+    var prev = el("div","img-preview-container"+(photo?" show":""));
+    prev.id = "prev-"+id;
+    if(photo) fillPreview(prev, photo, id, cat);
+    card.appendChild(prev);
+
+    host.appendChild(card);
+  });
+}
+
+function fillPreview(container, src, id, cat){
+  container.innerHTML = "";
+  var img = el("img","img-preview");
+  img.src = src;
+  container.appendChild(img);
+  var rm = el("button","img-remove","✕");
+  rm.type = "button";
+  rm.addEventListener("click", function(){ removePhoto(id, cat); });
+  container.appendChild(rm);
+  container.classList.add("show");
+}
+
+/* ============ LOGIC ============ */
+function toggleTask(id, cat){
+  var on = !state.checks[id];
+  state.checks[id] = on;
+  var card = $("card-"+id), btn = $("chk-"+id);
+  if(card) card.classList.toggle("completed", on);
+  if(btn) btn.classList.toggle("on", on);
+  if(on){ ding(); toast(L().ui.toast.star); }
+  saveState();
+  updateProgress(cat);
+  updateHUD();
+}
+
+function handlePhoto(input, id, cat){
+  var f = input.files && input.files[0];
+  if(!f) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var img = new Image();
+    img.onload = function(){
+      var data = compress(img, 600, .55) || compress(img, 400, .4);
+      if(!data){ toast(L().ui.toast.photoErr); return; }
+      storage.set(photoKey(id), data);
+      fillPreview($("prev-"+id), data, id, cat);
+      $("cam-"+id).classList.add("has-photo");
+      if(!state.checks[id]){
+        state.checks[id] = true;
+        $("card-"+id).classList.add("completed");
+        $("chk-"+id).classList.add("on");
+        toast(L().ui.toast.photoNew);
+      } else {
+        toast(L().ui.toast.photoBonus);
+      }
+      ding(true);
+      saveState();
+      updateProgress(cat);
+      updateHUD();
+    };
+    img.onerror = function(){ toast(L().ui.toast.photoErr); };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(f);
+  input.value = "";
+}
+
+function compress(img, maxDim, q){
+  try{
+    var s = Math.min(1, maxDim/Math.max(img.width, img.height));
+    var c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(img.width*s));
+    c.height = Math.max(1, Math.round(img.height*s));
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL("image/jpeg", q);
+  }catch(e){ return null; }
+}
+
+function removePhoto(id, cat){
+  storage.remove(photoKey(id));
+  var prev = $("prev-"+id);
+  if(prev){ prev.classList.remove("show"); prev.innerHTML=""; }
+  var cam = $("cam-"+id);
+  if(cam) cam.classList.remove("has-photo");
+  updateHUD();
+}
+
+function sectionCounts(cat){
+  var total = META[cat].length, done = 0;
+  META[cat].forEach(function(m,i){ if(state.checks[cat+"-"+i]) done++; });
+  return {done:done, total:total};
+}
+
+function updateProgress(cat){
+  var c = sectionCounts(cat);
+  var pct = c.total ? (c.done/c.total)*100 : 0;
+  var fill = $("progress-"+cat), txt = $("text-progress-"+cat), ship = $("ship-"+cat);
+  if(fill) fill.style.width = pct+"%";
+  if(txt) txt.textContent = c.done+"/"+c.total;
+  if(ship) ship.style.left = Math.max(2, Math.min(97, pct))+"%";
+
+  var cert = $("cert-"+cat);
+  if(cert){
+    if(pct === 100){
+      if(!cert.classList.contains("show")){
+        $("certname-"+cat).textContent = (state.avatar||"")+" "+(state.name||L().ui.defName);
+        cert.classList.add("show");
+        fireConfetti();
+        fanfare();
+        setTimeout(function(){ cert.scrollIntoView({behavior:"smooth", block:"end"}); }, 250);
+      }
+    } else {
+      cert.classList.remove("show");
+    }
+  }
+  var mb = $("menu-"+cat);
+  if(mb){ mb.textContent = c.done+"/"+c.total; mb.classList.toggle("done", c.done===c.total && c.total>0); }
+}
+
+function countPhotos(){
+  return storage.keys().filter(function(k){ return k.indexOf("norrona-photo-")===0; }).length;
+}
+function totalStars(){
+  var n=0; for(var k in state.checks){ if(state.checks[k]) n++; } return n;
+}
+function totalPoints(){ return totalStars()*PTS_CHECK + countPhotos()*PTS_PHOTO; }
+
+function rankFor(pts){
+  var idx = 0;
+  for(var i=0;i<RANK_META.length;i++){ if(pts >= RANK_META[i].min) idx = i; }
+  return idx;
+}
+
+function updateHUD(){
+  var pts = totalPoints(), stars = totalStars(), photos = countPhotos();
+  var ui = L().ui;
+  $("hudStars").textContent = stars;
+  $("hudPoints").textContent = pts;
+  $("hudPhotos").textContent = photos;
+  $("hudPtsWord").textContent = ui.pts;
+  $("rankPoints").textContent = pts;
+  var idx = rankFor(pts);
+  $("rankIcon").textContent = RANK_META[idx].icon;
+  $("rankName").textContent = ui.ranks[idx];
+  if(idx < RANK_META.length-1){
+    var next = RANK_META[idx+1];
+    var span = next.min - RANK_META[idx].min;
+    $("rankFill").style.width = Math.min(100, ((pts-RANK_META[idx].min)/span)*100)+"%";
+    $("rankNext").textContent = ui.rankNext.replace("{p}", next.min-pts).replace("{r}", next.icon+" "+ui.ranks[idx+1]);
+  } else {
+    $("rankFill").style.width = "100%";
+    $("rankNext").textContent = ui.rankMax;
+  }
+  $("menu-album").textContent = photos;
+  $("homeAvatar").textContent = state.avatar || "🦊";
+  $("homeName").textContent = state.name || ui.pickName;
+}
+
+/* ============ ALBUM ============ */
+function taskTitleFor(id){
+  var idx = id.lastIndexOf("-");
+  var cat = id.slice(0, idx), n = parseInt(id.slice(idx+1),10);
+  if(META[cat] && L().tasks[cat] && L().tasks[cat][n]) return META[cat][n].icon+" "+L().tasks[cat][n][0];
+  return "📸";
+}
+function renderAlbum(){
+  var host = $("albumContent");
+  var keys = storage.keys().filter(function(k){ return k.indexOf("norrona-photo-")===0; });
+  if(!keys.length){
+    host.innerHTML = "";
+    var empty = el("div","album-empty");
+    var big = el("span","big","📷");
+    empty.appendChild(big);
+    empty.appendChild(document.createTextNode(L().ui.albumEmpty));
+    host.appendChild(empty);
+    return;
+  }
+  host.innerHTML = "";
+  var grid = el("div","album-grid");
+  keys.forEach(function(k){
+    var id = k.replace("norrona-photo-","");
+    var item = el("div","album-item");
+    var img = el("img"); img.src = storage.get(k);
+    item.appendChild(img);
+    item.appendChild(el("div","album-caption", taskTitleFor(id)));
+    grid.appendChild(item);
+  });
+  host.appendChild(grid);
+}
+
+/* ============ SPROG ============ */
+function applyLang(){
+  var ui = L().ui;
+  document.documentElement.lang = state.lang;
+  $("langBtn").textContent = L().flag;
+  $("backBtn").textContent = ui.back;
+  $("headerTitle").textContent = ui.titles[currentView] || ui.titles.home;
+  $("welcomeH").textContent = ui.welcomeH;
+  $("welcomeP").textContent = ui.welcomeP;
+  ["onboard","hotel","faroe","album"].forEach(function(k){
+    $("mTitle-"+k).textContent = ui.menu[k][0];
+    $("mSub-"+k).textContent = ui.menu[k][1];
+  });
+  ["onboard","hotel","faroe"].forEach(function(cat){
+    $("plabel-"+cat).textContent = ui.plabel[cat];
+    $("intro-"+cat).textContent = ui.intro[cat];
+    $("certh-"+cat).textContent = ui.cert[cat][0];
+    $("certt-"+cat).textContent = ui.cert[cat][1];
+    $("certi-"+cat).textContent = ui.cert[cat][2];
+    var cn = $("certname-"+cat);
+    if(cn.textContent) cn.textContent = (state.avatar||"")+" "+(state.name||ui.defName);
+    renderSection(cat);
+    updateProgress(cat);
+  });
+  $("intro-album").textContent = ui.intro.album;
+  $("mSetupH").textContent = ui.modal.h;
+  $("mSetupP").textContent = ui.modal.p;
+  $("nameInput").placeholder = ui.modal.ph;
+  $("goBtn").textContent = ui.modal.btn;
+  $("mLangH").textContent = ui.langModal.h;
+  $("mLangP").textContent = ui.langModal.p;
+  if(currentView === "album") renderAlbum();
+  updateHUD();
+}
+
+function buildLangGrid(){
+  var g = $("langGrid");
+  g.innerHTML = "";
+  LANG_ORDER.forEach(function(code){
+    var o = el("div","lang-opt"+(code===state.lang?" sel":""));
+    var fl = el("span","fl", TR[code].flag);
+    o.appendChild(fl);
+    o.appendChild(document.createTextNode(TR[code].label));
+    o.addEventListener("click", function(){
+      state.lang = code;
+      saveState();
+      $("langModal").classList.remove("open");
+      applyLang();
+    });
+    g.appendChild(o);
+  });
+}
+function openLang(){
+  buildLangGrid();
+  $("langModal").classList.add("open");
+}
+
+/* ============ NAVIGATION ============ */
+function navigate(viewId){
+  currentView = viewId;
+  var views = document.querySelectorAll(".view");
+  for(var i=0;i<views.length;i++) views[i].classList.remove("active");
+  $(viewId).classList.add("active");
+  $("headerTitle").textContent = L().ui.titles[viewId] || "";
+  $("backBtn").style.display = viewId === "home" ? "none" : "block";
+  if(viewId === "album") renderAlbum();
+  if(META[viewId]) updateProgress(viewId);
+  $("mainContent").scrollTop = 0;
+}
+
+/* ============ SETUP MODAL ============ */
+var selAvatar = "🦊";
+function buildAvatarGrid(){
+  var g = $("avatarGrid");
+  g.innerHTML = "";
+  AVATARS.forEach(function(a){
+    var o = el("div","avatar-opt"+(a===selAvatar?" sel":""), a);
+    o.addEventListener("click", function(){
+      selAvatar = a;
+      var opts = g.querySelectorAll(".avatar-opt");
+      for(var i=0;i<opts.length;i++) opts[i].classList.remove("sel");
+      o.classList.add("sel");
+    });
+    g.appendChild(o);
+  });
+}
+function openSetup(){
+  selAvatar = state.avatar || "🦊";
+  $("nameInput").value = state.name || "";
+  buildAvatarGrid();
+  $("setupModal").classList.add("open");
+}
+function finishSetup(){
+  var n = $("nameInput").value.trim();
+  state.name = n || L().ui.defName;
+  state.avatar = selAvatar;
+  saveState();
+  $("setupModal").classList.remove("open");
+  updateHUD();
+  toast(L().ui.toast.welcome.replace("{n}", state.name)+" "+state.avatar);
+}
+
+/* ============ FEEDBACK ============ */
+var toastTimer;
+function toast(msg){
+  var t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 1800);
+}
+
+var audioCtx;
+function getCtx(){
+  try{ audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }catch(e){ return null; }
+}
+function ding(high){
+  var ctx = getCtx(); if(!ctx) return;
+  try{
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = "sine"; o.frequency.value = high ? 880 : 660;
+    g.gain.setValueAtTime(.12, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime+.35);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime+.35);
+  }catch(e){}
+}
+function fanfare(){
+  var ctx = getCtx(); if(!ctx) return;
+  try{
+    [523,659,784,1047].forEach(function(f,i){
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "triangle"; o.frequency.value = f;
+      var t0 = ctx.currentTime + i*.14;
+      g.gain.setValueAtTime(.13, t0);
+      g.gain.exponentialRampToValueAtTime(.001, t0+.4);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(t0); o.stop(t0+.4);
+    });
+  }catch(e){}
+}
+
+function fireConfetti(){
+  var canvas = $("confetti");
+  var ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  var pieces = [];
+  var colors = ["#FFC94D","#06D6A0","#EF476F","#1A5F99","#9B5DE5","#ffffff"];
+  for(var i=0;i<160;i++){
+    pieces.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height-canvas.height,
+      w:Math.random()*10+5, h:Math.random()*10+5,
+      color:colors[Math.floor(Math.random()*colors.length)],
+      sy:Math.random()*4+2, sx:Math.random()*3-1.5,
+      r:Math.random()*360, rs:Math.random()*10-5});
+  }
+  (function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    var active = false;
+    pieces.forEach(function(p){
+      p.y+=p.sy; p.x+=p.sx; p.r+=p.rs;
+      if(p.y < canvas.height) active = true;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r*Math.PI/180);
+      ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
+    });
+    if(active) requestAnimationFrame(animate);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  })();
+}
+
+/* ============ INIT ============ */
+function init(){
+  loadState();
+
+  $("backBtn").addEventListener("click", function(){ navigate("home"); });
+  $("langBtn").addEventListener("click", openLang);
+  $("heroAvatar").addEventListener("click", openSetup);
+  $("goBtn").addEventListener("click", finishSetup);
+  var menuBtns = document.querySelectorAll("[data-nav]");
+  for(var i=0;i<menuBtns.length;i++){
+    (function(btn){
+      btn.addEventListener("click", function(){ navigate(btn.getAttribute("data-nav")); });
+    })(menuBtns[i]);
+  }
+
+  applyLang();
+  updateHUD();
+
+  if(!state.name){ openLang(); }
+}
+
+/* Efter sprogvalg første gang: åbn navne-setup hvis navn mangler */
+document.addEventListener("click", function(e){
+  // når langModal lukkes og navn mangler → åbn setup
+});
+var _origApply = applyLang;
+applyLang = function(){
+  _origApply();
+  if(!state.name && !$("langModal").classList.contains("open") && !$("setupModal").classList.contains("open")){
+    openSetup();
+  }
+};
+
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}
+})();
+</script>
+</body>
+</html>
