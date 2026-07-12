@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Norröna & Færøerne Skattejagt</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --deep:#0C3456; --ocean:#1A5F99; --sky:#D6E8F9; --sky-soft:#EAF3FC;
+  --gold:#FFC94D; --gold-deep:#E8A800; --green:#06D6A0; --red:#EF476F;
+  --purple:#9B5DE5; --bg:#F2F7FB; --ink:#22344A; --card:#FFFFFF;
+  --shadow:0 8px 24px rgba(12,52,86,.10);
+  --shadow-sm:0 3px 10px rgba(12,52,86,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Fredoka',sans-serif;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--ink);display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;}
+
+/* ============ HEADER ============ */
+header{background:linear-gradient(160deg,#0A2E4E 0%,#14508A 70%,#1A5F99 100%);color:#fff;padding:14px 16px 22px;position:relative;z-index:20;}
+header::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:16px;
+  background:radial-gradient(18px 14px at 9px 16px, var(--bg) 98%, transparent 100%);
+  background-size:36px 16px;background-repeat:repeat-x;}
+.header-row{display:flex;align-items:center;justify-content:center;position:relative;min-height:34px;}
+.back-btn{position:absolute;left:0;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);padding:7px 13px;border-radius:20px;color:#fff;font-size:14px;font-weight:600;display:none;cursor:pointer;transition:background .2s;}
+.back-btn:active{background:rgba(255,255,255,.35);}
+#headerTitle{font-size:19px;font-weight:700;letter-spacing:.3px;text-shadow:0 2px 6px rgba(0,0,0,.25);}
+.hud{display:flex;justify-content:center;gap:8px;margin-top:10px;}
+.hud-chip{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:4px 13px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;backdrop-filter:blur(4px);}
+.hud-chip b{color:var(--gold);font-weight:700;}
+
+/* ============ MAIN ============ */
+main{flex:1;overflow-y:auto;padding:18px 16px 80px;position:relative;-webkit-overflow-scrolling:touch;}
+.view{display:none;animation:slideUp .4s cubic-bezier(.175,.885,.32,1.275);}
+.view.active{display:block;}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+
+/* ============ HOME ============ */
+.hero-container{position:relative;margin-bottom:26px;border-radius:22px;box-shadow:var(--shadow);overflow:visible;background:var(--sky);}
+.hero-clip{border-radius:22px;overflow:hidden;}
+.hero-img{width:100%;height:190px;object-fit:cover;display:block;}
+.hero-clip::after{content:'';position:absolute;inset:0;border-radius:22px;background:linear-gradient(180deg,transparent 45%,rgba(10,46,78,.55) 100%);pointer-events:none;}
+.hero-badge{position:absolute;top:14px;right:14px;background:var(--gold);color:var(--deep);padding:5px 13px;border-radius:20px;font-weight:700;font-size:13px;box-shadow:0 4px 10px rgba(0,0,0,.25);z-index:2;}
+.hero-avatar{position:absolute;bottom:-18px;left:16px;background:#fff;border-radius:40px;padding:6px 18px 6px 8px;display:flex;align-items:center;gap:9px;font-weight:700;color:var(--deep);box-shadow:0 8px 18px rgba(12,52,86,.22);cursor:pointer;z-index:3;font-size:15px;}
+.hero-avatar .em{font-size:24px;background:var(--sky);border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;}
+.hero-avatar .edit{font-size:12px;color:#8aa5bd;font-weight:600;}
+
+.rank-card{background:linear-gradient(135deg,#FFFBEF,#FFF3D1);border:2px solid #FFE3A0;border-radius:18px;padding:15px 16px 13px;margin-bottom:18px;box-shadow:var(--shadow-sm);}
+.rank-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}
+.rank-title{font-weight:700;color:var(--deep);font-size:17px;display:flex;align-items:center;gap:8px;}
+.rank-title .ri{font-size:24px;}
+.rank-pts{font-weight:700;color:var(--gold-deep);font-size:15px;background:#fff;padding:3px 11px;border-radius:14px;box-shadow:var(--shadow-sm);}
+.rank-bar{width:100%;height:13px;background:#fff;border-radius:20px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,.08);}
+.rank-fill{height:100%;background:linear-gradient(90deg,var(--gold),#FF9E42);width:0%;transition:width .6s ease;border-radius:20px;}
+.rank-next{font-size:12px;color:#a5813a;margin-top:7px;font-weight:600;text-align:right;}
+
+.welcome-text{text-align:center;margin-bottom:20px;padding:0 8px;}
+.welcome-text h2{font-size:24px;color:var(--deep);margin-bottom:5px;}
+.welcome-text p{font-size:14px;color:#5b7189;line-height:1.5;}
+
+.menu-grid{display:grid;gap:13px;}
+.menu-btn{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--card);border:none;border-radius:20px;font-size:18px;font-weight:700;color:var(--deep);cursor:pointer;box-shadow:var(--shadow-sm);transition:transform .15s, box-shadow .15s;position:relative;text-align:left;width:100%;}
+.menu-btn:active{transform:scale(.97);}
+.btn-icon{font-size:28px;width:56px;height:56px;min-width:56px;display:flex;align-items:center;justify-content:center;border-radius:16px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.08);}
+.menu-btn.blue .btn-icon{background:linear-gradient(145deg,#DCEBFB,#B9D8F5);}
+.menu-btn.gold .btn-icon{background:linear-gradient(145deg,#FFF0C9,#FFDF94);}
+.menu-btn.green .btn-icon{background:linear-gradient(145deg,#D3F8EC,#A8EFD7);}
+.menu-btn.purple .btn-icon{background:linear-gradient(145deg,#EEE2FC,#DCC6F8);}
+.menu-sub{font-size:12.5px;color:#7b90a5;font-weight:500;margin-top:2px;}
+.menu-progress{margin-left:auto;background:var(--sky);color:var(--ocean);font-size:12.5px;font-weight:700;padding:5px 11px;border-radius:14px;white-space:nowrap;}
+.menu-progress.done{background:var(--green);color:#fff;}
+
+/* ============ PROGRESS / VOYAGE ============ */
+.progress-header{background:#fff;padding:16px 16px 12px;border-radius:18px;box-shadow:var(--shadow);margin-bottom:16px;text-align:center;position:sticky;top:0;z-index:15;}
+.progress-text{font-weight:700;color:var(--deep);margin-bottom:16px;font-size:16px;}
+.progress-text b{color:var(--ocean);}
+.voyage{position:relative;padding:0 14px 2px 4px;}
+.voyage-track{width:100%;background:var(--sky-soft);border:1px solid var(--sky);border-radius:20px;height:16px;overflow:hidden;}
+.voyage-fill{height:100%;background:linear-gradient(90deg,#4DA3E8,var(--green));width:0%;transition:width .5s cubic-bezier(.4,0,.2,1);border-radius:20px;}
+.voyage-ship{position:absolute;top:-17px;left:2%;font-size:25px;transform:translateX(-50%);transition:left .5s cubic-bezier(.4,0,.2,1);filter:drop-shadow(0 3px 4px rgba(0,0,0,.25));animation:bob 2.5s ease-in-out infinite;z-index:2;}
+@keyframes bob{0%,100%{margin-top:0;}50%{margin-top:-3px;}}
+.voyage-goal{position:absolute;right:-2px;top:-16px;font-size:19px;}
+
+.section-intro{background:linear-gradient(135deg,#fff,var(--sky-soft));border:2px dashed #A9CBEA;border-radius:16px;padding:12px 15px;margin-bottom:16px;font-size:13.5px;color:#33506e;font-weight:600;text-align:center;line-height:1.5;}
+
+/* ============ TASK CARDS ============ */
+.task-card{background:var(--card);padding:16px 16px 15px;border-radius:20px;margin-bottom:13px;box-shadow:var(--shadow-sm);position:relative;border:2px solid transparent;transition:border-color .3s, background .3s;}
+.task-card.completed{border-color:#9FEBD3;background:#F2FDF9;}
+.task-card.completed .task-icon{background:#CBF6E8;}
+.task-header{display:flex;align-items:flex-start;gap:13px;margin-bottom:6px;padding-right:52px;}
+.task-icon{font-size:27px;background:var(--sky-soft);min-width:50px;height:50px;display:flex;align-items:center;justify-content:center;border-radius:15px;transition:background .3s;}
+.task-content{flex:1;min-width:0;}
+.task-title{font-weight:700;font-size:16.5px;color:var(--deep);margin-bottom:3px;line-height:1.25;}
+.task-desc{font-size:13.5px;color:#5b7189;line-height:1.45;}
+.fun-fact{font-size:11.5px;background:#FFF4D6;color:#9a7715;border:1px solid #FFE3A0;padding:4px 9px;border-radius:9px;display:inline-block;margin-top:8px;font-weight:600;line-height:1.35;}
+.task-pts{position:absolute;top:13px;right:13px;font-size:11px;font-weight:700;color:var(--gold-deep);background:#FFF8E4;border:1px solid #FFE3A0;padding:3px 8px;border-radius:11px;}
+.task-action{margin-top:13px;display:flex;align-items:center;gap:9px;}
+.task-input{flex:1;min-width:0;padding:11px 13px;border:2px solid var(--sky);border-radius:12px;font-size:16px;font-weight:600;color:var(--deep);outline:none;transition:border-color .2s;background:#FBFDFF;}
+.task-input:focus{border-color:var(--ocean);}
+.spacer{flex:1;}
+
+.camera-btn{background:linear-gradient(145deg,#DCEBFB,#C3DCF6);border:none;border-radius:14px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;font-size:21px;cursor:pointer;transition:transform .15s;flex-shrink:0;position:relative;box-shadow:inset 0 -3px 0 rgba(26,95,153,.18);}
+.camera-btn:active{transform:scale(.92);}
+.camera-btn.has-photo{background:linear-gradient(145deg,#FFE9AE,var(--gold));}
+.camera-btn.has-photo::after{content:'✓';position:absolute;top:-6px;right:-6px;background:var(--green);color:#fff;font-size:11px;font-weight:700;width:19px;height:19px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #fff;}
+.file-input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;}
+
+.check-btn{width:48px;height:48px;min-width:48px;background:#fff;border:3px solid var(--sky);border-radius:14px;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;justify-content:center;font-size:23px;color:transparent;box-shadow:var(--shadow-sm);}
+.check-btn.on{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 4px 12px rgba(6,214,160,.35);}
+.check-btn.on .star{animation:popIn .3s backwards;}
+@keyframes popIn{0%{transform:scale(0);}80%{transform:scale(1.25);}100%{transform:scale(1);}}
+
+.img-preview-container{text-align:center;padding-top:13px;border-top:2px dashed var(--sky);margin-top:13px;position:relative;display:none;}
+.img-preview-container.show{display:block;}
+.img-preview{max-height:150px;max-width:100%;border-radius:12px;border:3px solid var(--gold);box-shadow:0 4px 10px rgba(0,0,0,.14);}
+.img-remove{position:absolute;top:19px;right:6px;background:var(--red);color:#fff;border:none;width:29px;height:29px;border-radius:50%;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.3);}
+
+/* ============ CERTIFICATE ============ */
+.certificate{background:linear-gradient(150deg,#FFF9E6,#FFFFFF 55%,#FFF3D1);border:4px dashed var(--gold);border-radius:22px;padding:28px 20px;text-align:center;box-shadow:0 15px 35px rgba(255,201,77,.3);margin-top:28px;position:relative;overflow:hidden;display:none;animation:certPop .6s cubic-bezier(.175,.885,.32,1.275);}
+.certificate.show{display:block;}
+@keyframes certPop{0%{transform:scale(.85);opacity:0;}100%{transform:scale(1);opacity:1;}}
+.certificate::before{content:'🎊';position:absolute;top:-8px;left:-8px;font-size:54px;opacity:.45;}
+.certificate::after{content:'🎉';position:absolute;bottom:-8px;right:-8px;font-size:54px;opacity:.45;}
+.cert-icon{font-size:62px;margin-bottom:6px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.18));animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-9px);}}
+.certificate h2{color:#D4A017;margin-bottom:8px;font-size:23px;text-transform:uppercase;letter-spacing:2px;}
+.cert-name{font-size:20px;font-weight:700;color:var(--deep);margin-bottom:6px;}
+.cert-text{font-size:14.5px;font-weight:600;color:var(--ink);margin-bottom:14px;}
+.cert-instruction{background:#fff;padding:11px;border-radius:12px;font-size:13.5px;color:var(--deep);font-weight:700;border:2px solid var(--sky);line-height:1.45;}
+
+/* ============ ALBUM ============ */
+.album-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.album-item{background:#fff;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm);}
+.album-item img{width:100%;height:125px;object-fit:cover;display:block;}
+.album-caption{padding:8px 10px;font-size:11.5px;font-weight:600;color:var(--deep);line-height:1.3;}
+.album-empty{text-align:center;padding:55px 24px;color:#8298ad;font-weight:600;font-size:15px;line-height:1.6;}
+.album-empty .big{font-size:54px;display:block;margin-bottom:12px;}
+
+/* ============ TOAST ============ */
+#toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(90px);background:var(--deep);color:#fff;padding:12px 24px;border-radius:30px;font-weight:700;font-size:14.5px;box-shadow:0 10px 24px rgba(0,0,0,.35);z-index:200;transition:transform .35s cubic-bezier(.175,.885,.32,1.275);pointer-events:none;white-space:nowrap;}
+#toast.show{transform:translateX(-50%) translateY(0);}
+
+/* ============ MODAL ============ */
+.modal-backdrop{position:fixed;inset:0;background:rgba(10,46,78,.62);backdrop-filter:blur(5px);z-index:150;display:none;align-items:center;justify-content:center;padding:22px;}
+.modal-backdrop.open{display:flex;}
+.modal{background:#fff;border-radius:24px;padding:26px 22px;max-width:360px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.35);animation:certPop .45s cubic-bezier(.175,.885,.32,1.275);}
+.modal h2{color:var(--deep);font-size:22px;margin-bottom:5px;}
+.modal p{font-size:13.5px;color:#7b90a5;margin-bottom:16px;font-weight:500;}
+.avatar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.avatar-opt{font-size:31px;background:var(--sky-soft);border:3px solid transparent;border-radius:15px;padding:9px 0;cursor:pointer;transition:all .15s;}
+.avatar-opt.sel{border-color:var(--gold);background:#FFF6DC;transform:scale(1.09);}
+.name-input{width:100%;padding:13px;border:2px solid var(--sky);border-radius:13px;font-size:17px;font-weight:600;color:var(--deep);text-align:center;outline:none;margin-bottom:16px;background:#FBFDFF;}
+.name-input:focus{border-color:var(--ocean);}
+.go-btn{width:100%;padding:15px;background:linear-gradient(135deg,#1A5F99,#0C3456);color:#fff;border:none;border-radius:16px;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 8px 18px rgba(26,95,153,.4);transition:transform .15s;font-family:'Fredoka',sans-serif;}
+.go-btn:active{transform:scale(.96);}
+
+#confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100;}
+</style>
+</head>
+<body>
+
+<canvas id="confetti"></canvas>
+<div id="toast"></div>
+
+<!-- SETUP MODAL -->
+<div class="modal-backdrop" id="setupModal">
+  <div class="modal">
+    <h2>🗺️ Klar til eventyr?</h2>
+    <p>Vælg din figur og skriv dit navn!</p>
+    <div class="avatar-grid" id="avatarGrid"></div>
+    <input type="text" class="name-input" id="nameInput" placeholder="Dit navn..." maxlength="20">
+    <button class="go-btn" id="goBtn" type="button">Sæt sejl! ⚓</button>
+  </div>
+</div>
+
+<header>
+  <div class="header-row">
+    <button class="back-btn" id="backBtn" type="button">❮ Tilbage</button>
+    <span id="headerTitle">Skattejagt Eventyr</span>
+  </div>
+  <div class="hud">
+    <div class="hud-chip">⭐ <b id="hudStars">0</b></div>
+    <div class="hud-chip">🪙 <b id="hudPoints">0</b>&nbsp;point</div>
+    <div class="hud-chip">📸 <b id="hudPhotos">0</b></div>
+  </div>
+</header>
+
+<main id="mainContent">
+
+  <!-- HOME -->
+  <div id="home" class="view active">
+    <div class="hero-container">
+      <div class="hero-clip">
+        <svg class="hero-img" viewBox="0 0 400 190" preserveAspectRatio="xMidYMid slice" role="img" aria-label="MS Norröna sejler mod Færøerne">
+          <defs>
+            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#8EC9F5"/>
+              <stop offset="70%" stop-color="#CDE7FB"/>
+              <stop offset="100%" stop-color="#E8F4FD"/>
+            </linearGradient>
+            <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2E7FC2"/>
+              <stop offset="100%" stop-color="#14508A"/>
+            </linearGradient>
+          </defs>
+          <rect width="400" height="190" fill="url(#sky)"/>
+          <circle cx="340" cy="38" r="20" fill="#FFDE7A"/>
+          <circle cx="340" cy="38" r="26" fill="#FFDE7A" opacity=".3"/>
+          <!-- Færø-fjelde -->
+          <path d="M-10 120 L60 62 L110 105 L160 75 L215 120 Z" fill="#5E8F6E"/>
+          <path d="M120 120 L190 55 L245 95 L300 70 L360 120 L410 95 L410 130 L-10 130 Z" fill="#4A7A5C"/>
+          <path d="M60 62 L75 74 L60 80 L48 72 Z" fill="#EAF4EE"/>
+          <path d="M190 55 L204 68 L190 74 L178 66 Z" fill="#EAF4EE"/>
+          <!-- Sky-drys -->
+          <ellipse cx="90" cy="34" rx="26" ry="9" fill="#fff" opacity=".85"/>
+          <ellipse cx="112" cy="28" rx="18" ry="7" fill="#fff" opacity=".85"/>
+          <ellipse cx="235" cy="24" rx="22" ry="8" fill="#fff" opacity=".8"/>
+          <!-- Hav -->
+          <rect y="118" width="400" height="72" fill="url(#sea)"/>
+          <path d="M0 122 Q20 116 40 122 T80 122 T120 122 T160 122 T200 122 T240 122 T280 122 T320 122 T360 122 T400 122 V132 H0 Z" fill="#5FA8DE" opacity=".55"/>
+          <!-- Færgen -->
+          <g>
+            <!-- Skrog -->
+            <path d="M70 128 L82 158 L318 158 L338 128 Z" fill="#0C3456"/>
+            <path d="M70 128 L338 128 L332 137 L76 137 Z" fill="#123F63"/>
+            <text x="200" y="152" text-anchor="middle" font-family="Fredoka, sans-serif" font-size="13" font-weight="700" fill="#FFC94D" letter-spacing="3">NORRÖNA</text>
+            <!-- Overbygning -->
+            <rect x="98" y="100" width="212" height="28" rx="5" fill="#F5FAFF"/>
+            <rect x="118" y="82" width="172" height="22" rx="5" fill="#FFFFFF"/>
+            <rect x="146" y="66" width="112" height="20" rx="5" fill="#F5FAFF"/>
+            <!-- Vinduer -->
+            <g fill="#7FB6E3">
+              <rect x="108" y="108" width="11" height="8" rx="2"/><rect x="126" y="108" width="11" height="8" rx="2"/><rect x="144" y="108" width="11" height="8" rx="2"/><rect x="162" y="108" width="11" height="8" rx="2"/><rect x="180" y="108" width="11" height="8" rx="2"/><rect x="198" y="108" width="11" height="8" rx="2"/><rect x="216" y="108" width="11" height="8" rx="2"/><rect x="234" y="108" width="11" height="8" rx="2"/><rect x="252" y="108" width="11" height="8" rx="2"/><rect x="270" y="108" width="11" height="8" rx="2"/><rect x="288" y="108" width="11" height="8" rx="2"/>
+              <rect x="128" y="89" width="10" height="7" rx="2"/><rect x="145" y="89" width="10" height="7" rx="2"/><rect x="162" y="89" width="10" height="7" rx="2"/><rect x="179" y="89" width="10" height="7" rx="2"/><rect x="196" y="89" width="10" height="7" rx="2"/><rect x="213" y="89" width="10" height="7" rx="2"/><rect x="230" y="89" width="10" height="7" rx="2"/><rect x="247" y="89" width="10" height="7" rx="2"/><rect x="264" y="89" width="10" height="7" rx="2"/>
+              <rect x="156" y="72" width="9" height="7" rx="2"/><rect x="172" y="72" width="9" height="7" rx="2"/><rect x="188" y="72" width="9" height="7" rx="2"/><rect x="204" y="72" width="9" height="7" rx="2"/><rect x="220" y="72" width="9" height="7" rx="2"/><rect x="236" y="72" width="9" height="7" rx="2"/>
+            </g>
+            <!-- Skorsten med falk-mærke -->
+            <path d="M266 44 L288 44 L292 66 L262 66 Z" fill="#0C3456"/>
+            <rect x="262" y="52" width="30" height="6" fill="#FFC94D"/>
+            <!-- Mast -->
+            <rect x="151" y="46" width="3" height="20" fill="#8FA8BD"/>
+            <path d="M154 47 L170 51 L154 56 Z" fill="#EF476F"/>
+            <!-- Bovbølge -->
+            <path d="M58 155 Q68 146 80 152 Q72 160 60 160 Z" fill="#EAF6FF" opacity=".9"/>
+            <path d="M318 158 Q336 150 352 156 Q340 164 322 163 Z" fill="#EAF6FF" opacity=".8"/>
+          </g>
+          <!-- Måger -->
+          <path d="M52 46 q5 -6 10 0 q5 -6 10 0" stroke="#5C7A94" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path d="M300 60 q4 -5 8 0 q4 -5 8 0" stroke="#5C7A94" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- Bølgestriber -->
+          <g stroke="#7FB6E3" stroke-width="3" stroke-linecap="round" opacity=".5">
+            <path d="M20 172 h30"/><path d="M340 174 h34"/><path d="M50 182 h22"/><path d="M300 184 h26"/>
+          </g>
+        </svg>
+      </div>
+      <div class="hero-badge">🚢 MS Norröna</div>
+      <div class="hero-avatar" id="heroAvatar"><span class="em" id="homeAvatar">🦊</span><span id="homeName">Vælg navn</span><span class="edit">✏️</span></div>
+    </div>
+
+    <div class="rank-card">
+      <div class="rank-top">
+        <div class="rank-title"><span class="ri" id="rankIcon">🦀</span> <span id="rankName">Landkrabbe</span></div>
+        <div class="rank-pts">🪙 <span id="rankPoints">0</span></div>
+      </div>
+      <div class="rank-bar"><div class="rank-fill" id="rankFill"></div></div>
+      <div class="rank-next" id="rankNext"></div>
+    </div>
+
+    <div class="welcome-text">
+      <h2>Velkommen Ombord!</h2>
+      <p>Løs opgaver, tag billeder og saml point – kan du nå helt op og blive 🌟 Havets Legende?</p>
+    </div>
+
+    <div class="menu-grid">
+      <button class="menu-btn blue" data-nav="onboard" type="button">
+        <span class="btn-icon">⚓</span>
+        <span><span style="display:block">Skibet Norröna</span><span class="menu-sub">Udforsk hele skibet</span></span>
+        <span class="menu-progress" id="menu-onboard">0/0</span>
+      </button>
+      <button class="menu-btn gold" data-nav="hotel" type="button">
+        <span class="btn-icon">🏨</span>
+        <span><span style="display:block">Hotel-Detektiv</span><span class="menu-sub">Smyril Lines hoteller i land</span></span>
+        <span class="menu-progress" id="menu-hotel">0/0</span>
+      </button>
+      <button class="menu-btn green" data-nav="faroe" type="button">
+        <span class="btn-icon">⛰️</span>
+        <span><span style="display:block">Opdag Færøerne</span><span class="menu-sub">Hemmeligheder i naturen</span></span>
+        <span class="menu-progress" id="menu-faroe">0/0</span>
+      </button>
+      <button class="menu-btn purple" data-nav="album" type="button">
+        <span class="btn-icon">📸</span>
+        <span><span style="display:block">Min Fotobog</span><span class="menu-sub">Alle dine skatte-billeder</span></span>
+        <span class="menu-progress" id="menu-album">0</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ONBOARD -->
+  <div id="onboard" class="view">
+    <div class="progress-header">
+      <div class="progress-text">Norröna-Mission: <b id="text-progress-onboard">0/0</b> løst</div>
+      <div class="voyage">
+        <div class="voyage-ship" id="ship-onboard">🚢</div>
+        <div class="voyage-goal">🏝️</div>
+        <div class="voyage-track"><div class="voyage-fill" id="progress-onboard"></div></div>
+      </div>
+    </div>
+    <div class="section-intro">⭐ opgave = 10 point · 📸 billede = 5 bonuspoint<br>Sejl skibet helt frem til øen 🏝️</div>
+    <div id="tasks-onboard"></div>
+    <div id="cert-onboard" class="certificate">
+      <div class="cert-icon">🥇</div>
+      <h2>Kaptajnens Bevis</h2>
+      <div class="cert-name" id="certname-onboard"></div>
+      <p class="cert-text">har udforsket hele MS Norröna fra top til bund!</p>
+      <div class="cert-instruction">Vis denne skærm til personalet i receptionen – måske vanker der et rigtigt stempel eller en lille præmie! 🎁</div>
+    </div>
+  </div>
+
+  <!-- HOTEL -->
+  <div id="hotel" class="view">
+    <div class="progress-header">
+      <div class="progress-text">Hotel-Mission: <b id="text-progress-hotel">0/0</b> løst</div>
+      <div class="voyage">
+        <div class="voyage-ship" id="ship-hotel">🕵️</div>
+        <div class="voyage-goal">🏨</div>
+        <div class="voyage-track"><div class="voyage-fill" id="progress-hotel"></div></div>
+      </div>
+    </div>
+    <div class="section-intro">Smyril Line har sine egne hoteller: <b>Hotel Hafnia</b> og <b>Hotel Brandan</b> i Tórshavn – og <b>Hotel Skálavík</b> på øen Sandoy. Kan du løse detektiv-opgaverne? 🔎</div>
+    <div id="tasks-hotel"></div>
+    <div id="cert-hotel" class="certificate">
+      <div class="cert-icon">🕵️</div>
+      <h2>Hotel-Detektiv Bevis</h2>
+      <div class="cert-name" id="certname-hotel"></div>
+      <p class="cert-text">har løst alle hotel-mysterier på Færøerne!</p>
+      <div class="cert-instruction">Vis beviset i hotellets reception – de bliver helt sikkert imponerede! 🏆</div>
+    </div>
+  </div>
+
+  <!-- FAROE -->
+  <div id="faroe" class="view">
+    <div class="progress-header">
+      <div class="progress-text">Færø-Mission: <b id="text-progress-faroe">0/0</b> fundet</div>
+      <div class="voyage">
+        <div class="voyage-ship" id="ship-faroe">🚗</div>
+        <div class="voyage-goal">🌈</div>
+        <div class="voyage-track"><div class="voyage-fill" id="progress-faroe"></div></div>
+      </div>
+    </div>
+    <div class="section-intro">Sæt en ⭐ når du spotter tingene i land – og tag et billede som bevis! 📸</div>
+    <div id="tasks-faroe"></div>
+    <div id="cert-faroe" class="certificate">
+      <div class="cert-icon">🏆</div>
+      <h2>Fjeldfarer Bevis</h2>
+      <div class="cert-name" id="certname-faroe"></div>
+      <p class="cert-text">har fundet alle Færøernes store skatte!</p>
+      <div class="cert-instruction">Gem beviset på telefonen og vis det til vennerne derhjemme! 📸</div>
+    </div>
+  </div>
+
+  <!-- ALBUM -->
+  <div id="album" class="view">
+    <div class="section-intro">📸 Din helt egen fotobog fra rejsen! Alle billeder gemmes kun på denne telefon.</div>
+    <div id="albumContent"></div>
+  </div>
+
+</main>
+
+<script>
+(function(){
+'use strict';
+
+/* ================= DATA ================= */
+var TASKS = {
+  onboard: [
+    {icon:'🛟', title:'Redningsbåds-Tælleren', desc:'Gå en tur på det åbne dæk. Hvor mange store orange redningsbåde kan du tælle?', fact:'Norröna kan have ca. 1.482 passagerer med!', input:'number', ph:'Antal...'},
+    {icon:'🛎️', title:'Skibets Hjerte', desc:'Find receptionen på dæk 5. Sig "hej" og spørg om de har et skibskort til dig!', fact:'Receptionen kan hjælpe med næsten alt på rejsen.', input:null},
+    {icon:'🍔', title:'Madøret Noatun', desc:'Find caféen Noatun. Hvad ser allermest lækkert ud?', fact:'"Noatun" var havguden Njords hjem i vikingetiden!', input:'text', ph:'Jeg så...'},
+    {icon:'🍽️', title:'Den Store Buffet', desc:'Find buffet-restauranten Skansagarður. Hvor mange borde kan du tælle gennem vinduet?', fact:'Skansagarður er opkaldt efter en gammel færøsk skanse.', input:'number', ph:'Antal borde...'},
+    {icon:'🎶', title:'Undirhúsið', desc:'Gå ned i Undirhúsið og find scenen, hvor musikerne spiller om aftenen.', fact:'"Undirhúsið" betyder "Underhuset" på færøsk.', input:null},
+    {icon:'✨', title:'Laterna Magica', desc:'Gå helt op i Laterna Magica i toppen af skibet. Hvad kan du se ud af de store vinduer?', fact:'Laterna Magica betyder "Det magiske lys".', input:'text', ph:'Jeg kan se...'},
+    {icon:'🏊', title:'Den Skjulte Pool', desc:'Der gemmer sig en indendørs pool på skibet! Hvilket dæk ligger den på?', fact:'Den ligger på et af de allernederste dæk!', input:'number', ph:'Dæk nr...'},
+    {icon:'🎮', title:'Spillerummet', desc:'Find stedet med arkademaskiner og spil. Hvilket spil vil du helst prøve?', fact:'Perfekt sted, hvis det blæser udenfor!', input:'text', ph:'Spillet hedder...'},
+    {icon:'🦅', title:'Falke-Jagten', desc:'Find Smyril Lines fugle-logo et sted på skibet og tag et billede af det!', fact:'"Smyril" betyder faktisk "dværgfalk" på færøsk!', input:null},
+    {icon:'⬆️', title:'Elevator-Mysteriet', desc:'Gå ind i en elevator. Hvad er det højeste dæk-nummer, man kan trykke på?', fact:'Skibet er lige så højt som et højhus!', input:'number', ph:'Højeste dæk...'},
+    {icon:'🪜', title:'Trappe-Trin', desc:'Find en hovedtrappe og tæl trinnene fra dæk 5 op til dæk 6.', fact:'Besætningen får masser af gratis motion hver dag!', input:'number', ph:'Antal trin...'},
+    {icon:'🦺', title:'Sikkerhed Først', desc:'Find et grønt-hvidt skilt, der viser hvordan man tager en redningsvest på.', fact:'Sikkerhed er det allervigtigste til søs!', input:null},
+    {icon:'🚁', title:'Helikopter-Pladsen', desc:'Find det kæmpestore "H" malet på dækket udenfor. H betyder helikopter!', fact:'En redningshelikopter kan fire folk ned lige her.', input:null},
+    {icon:'🐕', title:'Hunde Ombord?', desc:'Spørg en fra personalet: Må man have sin hund med ud at sejle?', fact:'Ja! Nogle passagerer har faktisk fire ben.', input:null},
+    {icon:'🌊', title:'Kølvands-Kiggeren', desc:'Gå ud bagpå skibet og kig ned på det hvide skum, skibet laver i vandet.', fact:'Skibets skruer under vandet er lavet af kæmpe bronze!', input:null},
+    {icon:'🤳', title:'Sømands-Selfien', desc:'Tag en selfie med havet i baggrunden – dit sømandsbevis! (Tryk på kameraet)', fact:'Måske fanger du en fugl eller en hval i baggrunden!', input:null},
+    {icon:'🍦', title:'Is-Ekspeditionen', desc:'Find ud af hvor man kan købe is ombord. Hvilken smag er din favorit?', fact:'Is smager altid bedst med udsigt over Atlanterhavet.', input:'text', ph:'Min favorit er...'},
+    {icon:'🌅', title:'Horisont-Spejderen', desc:'Kig ud over havet i 2 minutter. Kan du få øje på et andet skib eller en fugl?', fact:'Herude kan der være over 100 km til nærmeste land!', input:null}
+  ],
+  hotel: [
+    {icon:'🏨', title:'Havnens Hotel', desc:'Find Hotel Hafnia midt i Tórshavn, tæt på havnen. Tag et billede af skiltet!', fact:'"Hafnia" betyder "havn" på latin – hotellet åbnede allerede i 1951!', input:null},
+    {icon:'🌿', title:'Græstags-Husene', desc:'Ved Hotel Hafnia står der små hyggelige huse med græs på taget. Kan du finde dem?', fact:'Græstaget virker som en varm dyne, når det stormer!', input:null},
+    {icon:'🏙️', title:'Det Nye Hotel', desc:'Find Hotel Brandan – Smyril Lines splinternye hotel. Hvor mange etager kan du tælle?', fact:'Hotel Brandan åbnede den 1. juli 2020.', input:'number', ph:'Antal etager...'},
+    {icon:'🗣️', title:'Sig det på Færøsk', desc:'Gå hen til receptionen og sig "Góðan dag!" (det betyder goddag). Fik du et smil tilbage?', fact:'Færøsk minder mere om vikingernes sprog end dansk gør!', input:null},
+    {icon:'🎨', title:'Kunst-Jagten', desc:'Find et maleri eller kunstværk i hotellets lobby og tag et billede af det.', fact:'Mange værker er lavet af færøske kunstnere.', input:null},
+    {icon:'🔢', title:'Værelses-Matematik', desc:'Læg alle tallene i jeres værelsesnummer sammen. Hvad giver det? (fx 214 → 2+1+4 = 7)', fact:'Hotel Hafnia har hele 79 værelser!', input:'number', ph:'Summen er...'},
+    {icon:'🥞', title:'Morgenmads-Missionen', desc:'Hvad er det bedste på morgenbuffeten? Smag noget, du aldrig har prøvet før!', fact:'Prøv skyr – det er nordens svar på yoghurt.', input:'text', ph:'Det bedste var...'},
+    {icon:'🪟', title:'Udsigts-Fotografen', desc:'Tag det flotteste billede du kan fra hotelvinduet eller lige udenfor hoveddøren.', fact:'Fra Hafnias tagterrasse kan man se ud over hele havnen!', input:null},
+    {icon:'🧖', title:'Hemmelige Rum', desc:'Find ud af om hotellet har en sauna eller et motionsrum. Spørg i receptionen!', fact:'En varm sauna er skøn efter en kold færø-dag.', input:null},
+    {icon:'🐑', title:'Ø-Hotellet', desc:'Bonus: Smyril Line har også Hotel Skálavík ude på øen Sandoy! Kommer I forbi: tæl fårene udenfor.', fact:'Hotel Skálavík ligger lige ned til en sort sandstrand!', input:'number', ph:'Antal får...'}
+  ],
+  faroe: [
+    {icon:'🐑', title:'Uld-Totten', desc:'Spot et får, der står helt ude ved vejkanten.', fact:'Der bor 70.000 får og kun 54.000 mennesker her!', input:null},
+    {icon:'🏡', title:'Græs på Taget', desc:'Find et hus med græs på taget.', fact:'Taget virker som en varm dyne om vinteren.', input:null},
+    {icon:'💦', title:'Vandfaldet', desc:'Spot vand, der løber ned ad et bjerg.', fact:'Øerne har tusindvis af vandfald!', input:null},
+    {icon:'🕳️', title:'Trylle-Tunnellen', desc:'Kør gennem en mørk bjerg-tunnel. Hold vejret hvis du tør!', fact:'En af tunnellerne under havet har en rundkørsel med lysshow!', input:null},
+    {icon:'🐧', title:'Klovne-Fuglen', desc:'Spot en lunde – fuglen med det farvestrålende næb.', fact:'Lunden kan fange over 10 fisk i næbbet ad gangen!', input:null},
+    {icon:'🐎', title:'Færøsk Hest', desc:'Spot en færøsk hest – den er mindre og mere pjusket end danske heste.', fact:'En af de ældste hesteracer i hele verden.', input:null},
+    {icon:'🦆', title:'Løsgående Gæs', desc:'Find en gås eller and, der bare går frit rundt i en landsby.', fact:'Mange fugle går over vejen præcis som det passer dem.', input:null},
+    {icon:'📬', title:'Blå Postkasse', desc:'Postkasser er ikke røde som i Danmark – find en blå!', fact:'"Posta" er det færøske postvæsen.', input:null},
+    {icon:'🐟', title:'Lakse-Ringene', desc:'Spot de kæmpestore runde ringe ude i fjorden.', fact:'Derinde bor titusindvis af færøske laks.', input:null},
+    {icon:'☁️', title:'Bjerg i Tåge', desc:'Find et bjerg, hvor toppen er helt gemt inde i en sky.', fact:'Der kan være sol nede og tåge oppe – samtidig!', input:null},
+    {icon:'🗽', title:'Bys-Statuen', desc:'Find en sten- eller bronzestatue i Tórshavn.', fact:'Mange statuer hylder de modige fiskere.', input:null},
+    {icon:'🎣', title:'Tørfisken', desc:'Spot fisk, der hænger udenfor et hus for at tørre i vinden.', fact:'Den salte vind virker som et naturligt køleskab!', input:null},
+    {icon:'⛴️', title:'Den Lille Færge', desc:'Spot en lille lokal færge, der sejler mellem øerne.', fact:'Før tunnellerne sejlede man i båd til ALT.', input:null},
+    {icon:'🪧', title:'Det Skøre Byskilt', desc:'Find et bynavn, du slet ikke kan udtale. Prøv at sige det højt tre gange!', fact:'Prøv fx at sige "Gjógv" eller "Kirkjubøur"!', input:'text', ph:'Byen hed...'},
+    {icon:'🌊', title:'Den Vilde Bølge', desc:'Spot en bølge, der slår hårdt ind mod klipperne.', fact:'Atlanterhavet har nogle af verdens stærkeste bølger.', input:null},
+    {icon:'⛪', title:'Træ-Kirken', desc:'Find en af de gamle sorte trækirker med græstag.', fact:'Mange bygder er bygget op omkring deres gamle kirke.', input:null},
+    {icon:'🇫🇴', title:'Færøernes Flag', desc:'Spot det færøske flag – hvidt med blåt og rødt kors.', fact:'Flaget hedder "Merkið" og vajer næsten altid i vinden.', input:null},
+    {icon:'🚁', title:'Ø-Helikopteren', desc:'Se eller hør en helikopter flyve forbi.', fact:'Helikopteren er "bybussen" til de allermindste øer!', input:null},
+    {icon:'🌈', title:'Regnbue-Jægeren', desc:'Sol og regn på samme tid? Find regnbuen!', fact:'Det skøre vejr gør Færøerne til regnbue-mestre.', input:null},
+    {icon:'🏞️', title:'Den Hængende Sø', desc:'Find en sø, der ligger højt oppe på et bjerg.', fact:'Søen Sørvágsvatn ser ud som om den svæver over havet!', input:null}
+  ]
+};
+
+var AVATARS = ['🦊','🐻','🦄','🐙','🦈','🐬','🦅','🐳'];
+var RANKS = [
+  {min:0,   icon:'🦀', name:'Landkrabbe'},
+  {min:80,  icon:'🧭', name:'Opdager'},
+  {min:200, icon:'🗺️', name:'Navigatør'},
+  {min:350, icon:'👑', name:'Kaptajn'},
+  {min:500, icon:'🌟', name:'Havets Legende'}
+];
+var PTS_CHECK = 10, PTS_PHOTO = 5;
+var STORE = 'norrona-hunt-v4';
+
+/* ============ SAFE STORAGE (virker også hvis localStorage er blokeret) ============ */
+var mem = {};
+var storage = {
+  get: function(k){ try{ var v = localStorage.getItem(k); return v !== null ? v : (k in mem ? mem[k] : null); }catch(e){ return k in mem ? mem[k] : null; } },
+  set: function(k,v){ mem[k]=v; try{ localStorage.setItem(k,v); }catch(e){} },
+  remove: function(k){ delete mem[k]; try{ localStorage.removeItem(k); }catch(e){} },
+  keys: function(){
+    var ks = {};
+    try{ for(var i=0;i<localStorage.length;i++){ ks[localStorage.key(i)] = 1; } }catch(e){}
+    for(var k in mem){ ks[k] = 1; }
+    return Object.keys(ks);
+  }
+};
+
+/* ================= STATE ================= */
+var state = {name:'', avatar:'🦊', checks:{}, inputs:{}};
+function loadState(){ try{ var s = JSON.parse(storage.get(STORE)); if(s) { state.name=s.name||''; state.avatar=s.avatar||'🦊'; state.checks=s.checks||{}; state.inputs=s.inputs||{}; } }catch(e){} }
+function saveState(){ storage.set(STORE, JSON.stringify(state)); }
+function photoKey(id){ return 'norrona-photo-'+id; }
+function getPhoto(id){ return storage.get(photoKey(id)); }
+
+/* ================= HELPERS ================= */
+function el(tag, cls, text){
+  var e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(text !== undefined) e.textContent = text;
+  return e;
+}
+function $(id){ return document.getElementById(id); }
+
+/* ================= RENDER (DOM-baseret, ingen inline handlers) ================= */
+function renderSection(cat){
+  var host = $('tasks-'+cat);
+  host.innerHTML = '';
+  TASKS[cat].forEach(function(t, i){
+    var id = cat+'-'+i;
+    var checked = !!state.checks[id];
+    var photo = getPhoto(id);
+
+    var card = el('div', 'task-card'+(checked?' completed':''));
+    card.id = 'card-'+id;
+
+    card.appendChild(el('div','task-pts','+'+(PTS_CHECK+PTS_PHOTO)+' 🪙'));
+
+    var head = el('div','task-header');
+    head.appendChild(el('div','task-icon', t.icon));
+    var content = el('div','task-content');
+    content.appendChild(el('div','task-title', (i+1)+'. '+t.title));
+    content.appendChild(el('div','task-desc', t.desc));
+    content.appendChild(el('div','fun-fact', '💡 '+t.fact));
+    head.appendChild(content);
+    card.appendChild(head);
+
+    var action = el('div','task-action');
+    if(t.input){
+      var inp = el('input','task-input');
+      inp.type = t.input;
+      inp.placeholder = t.ph || '';
+      inp.value = state.inputs[id] || '';
+      inp.addEventListener('input', function(){ state.inputs[id] = inp.value; saveState(); });
+      action.appendChild(inp);
+    } else {
+      action.appendChild(el('div','spacer'));
+    }
+
+    // Kamera
+    var cam = el('label','camera-btn'+(photo?' has-photo':''));
+    cam.id = 'cam-'+id;
+    cam.appendChild(document.createTextNode('📸'));
+    var file = el('input','file-input');
+    file.type = 'file';
+    file.accept = 'image/*';
+    file.setAttribute('capture','environment');
+    file.addEventListener('change', function(){ handlePhoto(file, id, cat); });
+    cam.appendChild(file);
+    action.appendChild(cam);
+
+    // Stjerne-knap (i stedet for checkbox)
+    var chk = el('button','check-btn'+(checked?' on':''));
+    chk.type = 'button';
+    chk.id = 'chk-'+id;
+    chk.innerHTML = '<span class="star">⭐</span>';
+    chk.addEventListener('click', function(){ toggleTask(id, cat); });
+    action.appendChild(chk);
+
+    card.appendChild(action);
+
+    // Preview
+    var prev = el('div','img-preview-container'+(photo?' show':''));
+    prev.id = 'prev-'+id;
+    if(photo) fillPreview(prev, photo, id, cat);
+    card.appendChild(prev);
+
+    host.appendChild(card);
+  });
+}
+
+function fillPreview(container, src, id, cat){
+  container.innerHTML = '';
+  var img = el('img','img-preview');
+  img.src = src;
+  container.appendChild(img);
+  var rm = el('button','img-remove','✕');
+  rm.type = 'button';
+  rm.addEventListener('click', function(){ removePhoto(id, cat); });
+  container.appendChild(rm);
+  container.classList.add('show');
+}
+
+/* ================= LOGIC ================= */
+function toggleTask(id, cat){
+  var on = !state.checks[id];
+  state.checks[id] = on;
+  var card = $('card-'+id), btn = $('chk-'+id);
+  if(card) card.classList.toggle('completed', on);
+  if(btn) btn.classList.toggle('on', on);
+  if(on){ ding(); toast('+'+PTS_CHECK+' point! ⭐'); }
+  saveState();
+  updateProgress(cat);
+  updateHUD();
+}
+
+function handlePhoto(input, id, cat){
+  var f = input.files && input.files[0];
+  if(!f) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var img = new Image();
+    img.onload = function(){
+      var data = compress(img, 600, .55) || compress(img, 400, .4);
+      if(!data){ toast('Hovsa – kunne ikke gemme billedet 😅'); return; }
+      storage.set(photoKey(id), data);
+      fillPreview($('prev-'+id), data, id, cat);
+      $('cam-'+id).classList.add('has-photo');
+      if(!state.checks[id]){
+        state.checks[id] = true;
+        $('card-'+id).classList.add('completed');
+        $('chk-'+id).classList.add('on');
+        toast('Sejt billede! +'+(PTS_CHECK+PTS_PHOTO)+' point! 📸⭐');
+      } else {
+        toast('Billede gemt! +'+PTS_PHOTO+' bonuspoint! 📸');
+      }
+      ding(true);
+      saveState();
+      updateProgress(cat);
+      updateHUD();
+    };
+    img.onerror = function(){ toast('Kunne ikke læse billedet 😅'); };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(f);
+  input.value = '';
+}
+
+function compress(img, maxDim, q){
+  try{
+    var s = Math.min(1, maxDim/Math.max(img.width, img.height));
+    var c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(img.width*s));
+    c.height = Math.max(1, Math.round(img.height*s));
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', q);
+  }catch(e){ return null; }
+}
+
+function removePhoto(id, cat){
+  storage.remove(photoKey(id));
+  var prev = $('prev-'+id);
+  if(prev){ prev.classList.remove('show'); prev.innerHTML=''; }
+  var cam = $('cam-'+id);
+  if(cam) cam.classList.remove('has-photo');
+  updateHUD();
+}
+
+function sectionCounts(cat){
+  var total = TASKS[cat].length, done = 0;
+  TASKS[cat].forEach(function(t,i){ if(state.checks[cat+'-'+i]) done++; });
+  return {done:done, total:total};
+}
+
+function updateProgress(cat){
+  var c = sectionCounts(cat);
+  var pct = c.total ? (c.done/c.total)*100 : 0;
+  var fill = $('progress-'+cat), txt = $('text-progress-'+cat), ship = $('ship-'+cat);
+  if(fill) fill.style.width = pct+'%';
+  if(txt) txt.textContent = c.done+'/'+c.total;
+  if(ship) ship.style.left = Math.max(2, Math.min(97, pct))+'%';
+
+  var cert = $('cert-'+cat);
+  if(cert){
+    if(pct === 100){
+      if(!cert.classList.contains('show')){
+        $('certname-'+cat).textContent = (state.avatar||'')+' '+(state.name||'Skattejæger');
+        cert.classList.add('show');
+        fireConfetti();
+        fanfare();
+        setTimeout(function(){ cert.scrollIntoView({behavior:'smooth', block:'end'}); }, 250);
+      }
+    } else {
+      cert.classList.remove('show');
+    }
+  }
+  var mb = $('menu-'+cat);
+  if(mb){ mb.textContent = c.done+'/'+c.total; mb.classList.toggle('done', c.done===c.total && c.total>0); }
+}
+
+function countPhotos(){
+  return storage.keys().filter(function(k){ return k.indexOf('norrona-photo-')===0; }).length;
+}
+function totalStars(){
+  var n=0; for(var k in state.checks){ if(state.checks[k]) n++; } return n;
+}
+function totalPoints(){ return totalStars()*PTS_CHECK + countPhotos()*PTS_PHOTO; }
+
+function rankFor(pts){
+  var r = RANKS[0], next = null;
+  for(var i=0;i<RANKS.length;i++){
+    if(pts >= RANKS[i].min) r = RANKS[i];
+    else { next = RANKS[i]; break; }
+  }
+  return {rank:r, next:next};
+}
+
+function updateHUD(){
+  var pts = totalPoints(), stars = totalStars(), photos = countPhotos();
+  $('hudStars').textContent = stars;
+  $('hudPoints').textContent = pts;
+  $('hudPhotos').textContent = photos;
+  $('rankPoints').textContent = pts;
+  var info = rankFor(pts);
+  $('rankIcon').textContent = info.rank.icon;
+  $('rankName').textContent = info.rank.name;
+  if(info.next){
+    var span = info.next.min - info.rank.min;
+    $('rankFill').style.width = Math.min(100, ((pts-info.rank.min)/span)*100)+'%';
+    $('rankNext').textContent = (info.next.min-pts)+' point til '+info.next.icon+' '+info.next.name;
+  } else {
+    $('rankFill').style.width = '100%';
+    $('rankNext').textContent = '🏆 Højeste rang – du er en ægte Havets Legende!';
+  }
+  $('menu-album').textContent = photos;
+  $('homeAvatar').textContent = state.avatar || '🦊';
+  $('homeName').textContent = state.name || 'Vælg navn';
+}
+
+/* ================= ALBUM ================= */
+function taskTitleFor(id){
+  var idx = id.lastIndexOf('-');
+  var cat = id.slice(0, idx), n = parseInt(id.slice(idx+1),10);
+  if(TASKS[cat] && TASKS[cat][n]) return TASKS[cat][n].icon+' '+TASKS[cat][n].title;
+  return '📸 Billede';
+}
+function renderAlbum(){
+  var host = $('albumContent');
+  var keys = storage.keys().filter(function(k){ return k.indexOf('norrona-photo-')===0; });
+  if(!keys.length){
+    host.innerHTML = '<div class="album-empty"><span class="big">📷</span>Endnu ingen billeder!<br>Tryk på 📸-knappen ved en opgave for at komme i gang.</div>';
+    return;
+  }
+  host.innerHTML = '';
+  var grid = el('div','album-grid');
+  keys.forEach(function(k){
+    var id = k.replace('norrona-photo-','');
+    var item = el('div','album-item');
+    var img = el('img'); img.src = storage.get(k);
+    item.appendChild(img);
+    item.appendChild(el('div','album-caption', taskTitleFor(id)));
+    grid.appendChild(item);
+  });
+  host.appendChild(grid);
+}
+
+/* ================= NAVIGATION ================= */
+var TITLES = {home:'Skattejagt Eventyr', onboard:'🚢 Norröna Mission', hotel:'🏨 Hotel-Detektiv', faroe:'⛰️ Færøerne', album:'📸 Min Fotobog'};
+function navigate(viewId){
+  var views = document.querySelectorAll('.view');
+  for(var i=0;i<views.length;i++) views[i].classList.remove('active');
+  $(viewId).classList.add('active');
+  $('headerTitle').textContent = TITLES[viewId] || 'Skattejagt';
+  $('backBtn').style.display = viewId === 'home' ? 'none' : 'block';
+  if(viewId === 'album') renderAlbum();
+  if(TASKS[viewId]) updateProgress(viewId);
+  $('mainContent').scrollTop = 0;
+}
+
+/* ================= SETUP MODAL ================= */
+var selAvatar = '🦊';
+function buildAvatarGrid(){
+  var g = $('avatarGrid');
+  g.innerHTML = '';
+  AVATARS.forEach(function(a){
+    var o = el('div','avatar-opt'+(a===selAvatar?' sel':''), a);
+    o.addEventListener('click', function(){
+      selAvatar = a;
+      var opts = g.querySelectorAll('.avatar-opt');
+      for(var i=0;i<opts.length;i++) opts[i].classList.remove('sel');
+      o.classList.add('sel');
+    });
+    g.appendChild(o);
+  });
+}
+function openSetup(){
+  selAvatar = state.avatar || '🦊';
+  $('nameInput').value = state.name || '';
+  buildAvatarGrid();
+  $('setupModal').classList.add('open');
+}
+function finishSetup(){
+  var n = $('nameInput').value.trim();
+  state.name = n || 'Skattejæger';
+  state.avatar = selAvatar;
+  saveState();
+  $('setupModal').classList.remove('open');
+  updateHUD();
+  toast('Velkommen ombord, '+state.name+'! '+state.avatar);
+}
+
+/* ================= FEEDBACK ================= */
+var toastTimer;
+function toast(msg){
+  var t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 1800);
+}
+
+var audioCtx;
+function getCtx(){
+  try{ audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }catch(e){ return null; }
+}
+function ding(high){
+  var ctx = getCtx(); if(!ctx) return;
+  try{
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.value = high ? 880 : 660;
+    g.gain.setValueAtTime(.12, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime+.35);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime+.35);
+  }catch(e){}
+}
+function fanfare(){
+  var ctx = getCtx(); if(!ctx) return;
+  try{
+    [523,659,784,1047].forEach(function(f,i){
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'triangle'; o.frequency.value = f;
+      var t0 = ctx.currentTime + i*.14;
+      g.gain.setValueAtTime(.13, t0);
+      g.gain.exponentialRampToValueAtTime(.001, t0+.4);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(t0); o.stop(t0+.4);
+    });
+  }catch(e){}
+}
+
+function fireConfetti(){
+  var canvas = $('confetti');
+  var ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  var pieces = [];
+  var colors = ['#FFC94D','#06D6A0','#EF476F','#1A5F99','#9B5DE5','#ffffff'];
+  for(var i=0;i<160;i++){
+    pieces.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height-canvas.height,
+      w:Math.random()*10+5, h:Math.random()*10+5,
+      color:colors[Math.floor(Math.random()*colors.length)],
+      sy:Math.random()*4+2, sx:Math.random()*3-1.5,
+      r:Math.random()*360, rs:Math.random()*10-5});
+  }
+  (function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    var active = false;
+    pieces.forEach(function(p){
+      p.y+=p.sy; p.x+=p.sx; p.r+=p.rs;
+      if(p.y < canvas.height) active = true;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r*Math.PI/180);
+      ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
+    });
+    if(active) requestAnimationFrame(animate);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  })();
+}
+
+/* ================= INIT ================= */
+function init(){
+  loadState();
+  ['onboard','hotel','faroe'].forEach(function(cat){
+    renderSection(cat);
+    updateProgress(cat);
+  });
+  updateHUD();
+
+  $('backBtn').addEventListener('click', function(){ navigate('home'); });
+  $('heroAvatar').addEventListener('click', openSetup);
+  $('goBtn').addEventListener('click', finishSetup);
+  var menuBtns = document.querySelectorAll('[data-nav]');
+  for(var i=0;i<menuBtns.length;i++){
+    (function(btn){
+      btn.addEventListener('click', function(){ navigate(btn.getAttribute('data-nav')); });
+    })(menuBtns[i]);
+  }
+
+  if(!state.name){ openSetup(); }
+}
+
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+})();
+</script>
+</body>
+</html>
